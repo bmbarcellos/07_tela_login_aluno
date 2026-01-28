@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema de Prova Digital – UFF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --uff-blue: #003366;
+      --uff-light: #e6eef5;
+      --uff-gray: #f4f6f8;
+      --text-dark: #1f2933;
+      --danger: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--uff-gray);
+      color: var(--text-dark);
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header img {
+      height: 48px;
+    }
+
+    header .title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--uff-blue);
+    }
+
+    main {
+      max-width: 720px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 36px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--uff-blue);
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      color: #475569;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--uff-light);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--uff-blue);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: var(--uff-blue);
+      color: #ffffff;
+    }
+
+    .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .alert {
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Logo_UFF_%28blue%29.svg" alt="UFF">
+  <div class="title">Universidade Federal Fluminense</div>
+</header>
+
+<main>
+
+  <!-- LOGIN -->
+  <section id="loginSection">
+    <h1>Sistema de Prova Digital</h1>
+    <p class="subtitle">
+      Plataforma oficial de avaliação acadêmica da Universidade Federal Fluminense
+    </p>
+
+    <div class="card">
+      <label for="email">Email institucional</label>
+      <input type="email" id="email" placeholder="nome.sobrenome@id.uff.br" />
+
+      <label for="matricula">Matrícula</label>
+      <input type="password" id="matricula" placeholder="Digite sua matrícula" />
+
+      <button class="btn" onclick="loginAluno()">Entrar</button>
+    </div>
+  </section>
+
+  <!-- INSTRUÇÕES -->
+  <section id="instrucoesSection" class="hidden">
+    <h1>Instruções da Prova</h1>
+    <p class="subtitle">
+      Leia atentamente antes de iniciar
+    </p>
+
+    <div class="alert">
+      Esta prova será monitorada eletronicamente. Todas as ações realizadas durante a avaliação
+      poderão ser registradas para fins acadêmicos e de auditoria.
+    </div>
+
+    <ul>
+      <li>A prova só poderá ser iniciada após liberação do professor.</li>
+      <li>O tempo de prova será controlado automaticamente pelo sistema.</li>
+      <li>Troca de abas, saída do modo tela cheia e recarregamentos poderão ser registrados.</li>
+      <li>Ao finalizar, suas respostas serão criptografadas e enviadas para correção.</li>
+      <li>Não é permitido o uso de materiais externos não autorizados.</li>
+    </ul>
+
+    <button class="btn" id="btnIniciar" disabled>
+      Aguardando liberação do professor
+    </button>
+  </section>
+
+</main>
+
+<footer>
+  Sistema de Prova Digital – Universidade Federal Fluminense © 2026
+</footer>
+
+<script>
+  function loginAluno() {
+    // Aqui futuramente será disparado o workflow 7 (login)
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("instrucoesSection").classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
