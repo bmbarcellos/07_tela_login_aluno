@@ -52,8 +52,18 @@
     .subtitle {
       text-align: center;
       font-size: 0.9rem;
-      margin-bottom: 26px;
+      margin-bottom: 18px;
       color: #4b5563;
+    }
+
+    /* BLOCO DE BOAS-VINDAS */
+    .welcome {
+      background: var(--uff-light-blue);
+      border-left: 4px solid var(--uff-blue);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 22px;
     }
 
     .instructions {
@@ -137,6 +147,11 @@
     <h1>Instruções da Prova</h1>
     <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
 
+    <!-- BOAS-VINDAS PERSONALIZADAS -->
+    <div id="welcomeMessage" class="welcome">
+      Bem-vindo(a)!
+    </div>
+
     <div class="instructions">
       <ul>
         <li>Leia atentamente todas as questões antes de responder.</li>
@@ -170,7 +185,17 @@
   </div>
 
 <script>
-  // Verifica se existe sessão válida
+  // ===== BOAS-VINDAS COM NOME DO ALUNO =====
+  const alunoRaw = sessionStorage.getItem("aluno");
+  if (alunoRaw) {
+    const aluno = JSON.parse(alunoRaw);
+    if (aluno.nome) {
+      document.getElementById("welcomeMessage").innerHTML =
+        `<strong>Bem-vindo(a), ${aluno.nome}.</strong><br>Leia atentamente as instruções abaixo antes de iniciar a prova.`;
+    }
+  }
+
+  // ===== LÓGICA ORIGINAL (INALTERADA) =====
   const sessionToken = sessionStorage.getItem("session_token");
   const expiraEm = sessionStorage.getItem("expira_em");
 
@@ -183,8 +208,7 @@
     erroDiv.style.display = "block";
     form.querySelectorAll("input, button").forEach(el => el.disabled = true);
   } else {
-    // Botão continua desativado até que professor libere a prova (verificação futura)
-    btn.disabled = true; // Mantido desativado por enquanto
+    btn.disabled = true;
   }
 
   form.addEventListener("submit", (e) => {
@@ -197,11 +221,7 @@
       return;
     }
 
-    // Para agora apenas salvar prova_id e session no sessionStorage
     sessionStorage.setItem("prova_id", provaId);
-
-    // Aqui o botão poderia ser habilitado quando a prova estiver EM_EXECUCAO
-    // Ex.: btn.classList.add('enabled'); btn.disabled = false;
 
     alert("Prova registrada. O botão de início será habilitado quando o professor liberar a prova.");
   });
