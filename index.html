@@ -2,207 +2,182 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Sistema de Prova Digital – UFF</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Prova Digital – UFF</title>
 
   <style>
     :root {
-      --uff-blue: #003366;
-      --uff-light: #e6eef5;
+      --uff-blue: #00529b;
+      --uff-light-blue: #e6f0fa;
       --uff-gray: #f4f6f8;
       --text-dark: #1f2933;
     }
 
     * {
       box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--uff-gray);
+      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--text-dark);
     }
 
-    header {
+    .card {
       background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      width: 100%;
+      max-width: 460px;
+      padding: 32px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
 
-    header img {
-      height: 48px;
-    }
-
-    header .title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--uff-blue);
-    }
-
-    main {
-      max-width: 720px;
-      margin: 40px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 36px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    .logo {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 180px;
     }
 
     h1 {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 6px;
       color: var(--uff-blue);
-      margin-bottom: 8px;
     }
 
-    p.subtitle {
-      color: #475569;
-      margin-bottom: 32px;
-    }
-
-    .card {
-      background: var(--uff-light);
-      border-radius: 10px;
-      padding: 24px;
-      margin-bottom: 24px;
+    .subtitle {
+      text-align: center;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+      color: #4b5563;
     }
 
     label {
       display: block;
-      font-weight: 600;
+      font-size: 0.85rem;
       margin-bottom: 6px;
+      font-weight: 600;
     }
 
     input {
       width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
       border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      font-size: 0.95rem;
     }
 
     input:focus {
       outline: none;
       border-color: var(--uff-blue);
+      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
     }
 
-    .btn {
+    button {
       width: 100%;
       padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
       border-radius: 10px;
       border: none;
-      cursor: pointer;
       background: var(--uff-blue);
       color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    .btn:disabled {
-      background: #94a3b8;
+    button:hover:not(:disabled) {
+      background: #003f7a;
+    }
+
+    button:disabled {
+      background: #9ca3af;
       cursor: not-allowed;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    .alert {
-      background: #fff7ed;
-      border-left: 4px solid #f97316;
+    .info {
+      margin-top: 22px;
       padding: 16px;
-      border-radius: 6px;
-      margin-bottom: 24px;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    ul li {
-      margin-bottom: 8px;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 32px;
+      background: var(--uff-gray);
+      border-radius: 10px;
       font-size: 0.85rem;
-      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .info strong {
+      color: var(--uff-blue);
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
     }
   </style>
 </head>
 
 <body>
+  <div class="card">
 
-<header>
-  <img
-    src="https://upload.wikimedia.org/wikipedia/commons/5/53/Logo_UFF_%28blue%29.png"
-    alt="Universidade Federal Fluminense">
-  <div class="title">Universidade Federal Fluminense</div>
-</header>
+    <img
+      src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
+      alt="Universidade Federal Fluminense"
+      class="logo"
+    />
 
-<main>
-
-  <!-- LOGIN -->
-  <section id="loginSection">
     <h1>Sistema de Prova Digital</h1>
-    <p class="subtitle">
-      Plataforma de avaliação acadêmica em fase de testes
-    </p>
+    <div class="subtitle">
+      Universidade Federal Fluminense
+    </div>
 
-    <div class="card">
-      <label for="email">Email institucional</label>
-      <input type="email" id="email" placeholder="nome.sobrenome@id.uff.br" />
+    <form id="loginForm">
+      <label for="email">E-mail institucional</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="nome@id.uff.br"
+        required
+      />
 
       <label for="matricula">Matrícula</label>
-      <input type="password" id="matricula" placeholder="Digite sua matrícula" />
+      <input
+        type="password"
+        id="matricula"
+        name="matricula"
+        placeholder="Digite sua matrícula"
+        required
+      />
 
-      <button class="btn" onclick="loginAluno()">Entrar</button>
+      <button type="submit">
+        Validar acesso
+      </button>
+    </form>
+
+    <div class="info">
+      <strong>Instruções da prova</strong><br /><br />
+      • A prova somente poderá ser iniciada após liberação pelo professor.<br />
+      • O tempo de prova começa a contar a partir do início efetivo.<br />
+      • Não é permitido atualizar a página durante a prova.<br />
+      • Tentativas de acesso e ações suspeitas podem ser registradas.<br />
+      • Ao finalizar, suas respostas serão enviadas automaticamente.
     </div>
-  </section>
 
-  <!-- INSTRUÇÕES -->
-  <section id="instrucoesSection" class="hidden">
-    <h1>Instruções da Prova</h1>
-    <p class="subtitle">
-      Leia atentamente antes de iniciar
-    </p>
-
-    <div class="alert">
-      Esta prova será monitorada eletronicamente. Todas as ações realizadas durante a avaliação
-      poderão ser registradas para fins acadêmicos e de auditoria.
-    </div>
-
-    <ul>
-      <li>A prova só poderá ser iniciada após liberação do professor.</li>
-      <li>O tempo de prova será controlado automaticamente pelo sistema.</li>
-      <li>Troca de abas, saída do modo tela cheia e recarregamentos poderão ser registrados.</li>
-      <li>Ao finalizar, suas respostas serão criptografadas e enviadas para correção.</li>
-      <li>Não é permitido o uso de materiais externos não autorizados.</li>
-    </ul>
-
-    <button class="btn" id="btnIniciar" disabled>
-      Aguardando liberação do professor
+    <button style="margin-top: 16px;" disabled>
+      Iniciar Prova
     </button>
-  </section>
 
-</main>
+    <div class="footer">
+      Ambiente experimental para avaliações acadêmicas digitais
+    </div>
 
-<footer>
-  Sistema de Prova Digital – Universidade Federal Fluminense © 2026
-</footer>
-
-<script>
-  function loginAluno() {
-    // Futuramente: chamada ao workflow 7 (login do aluno)
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("instrucoesSection").classList.remove("hidden");
-  }
-</script>
-
+  </div>
 </body>
 </html>
