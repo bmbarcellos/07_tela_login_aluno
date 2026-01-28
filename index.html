@@ -2,150 +2,177 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <title>Sistema de Prova Digital – UFF</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login do Aluno – Sistema de Prova Digital UFF</title>
 
   <style>
     :root {
-      --uff-blue: #00529b;
-      --uff-light-blue: #e6f0fa;
+      --uff-blue: #003366;
+      --uff-light: #f4f6f8;
       --text-dark: #1f2933;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--uff-light);
       color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    .card {
+    .login-card {
       background: #ffffff;
+      border-radius: 12px;
       width: 100%;
       max-width: 420px;
-      padding: 34px;
-      border-radius: 14px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      padding: 32px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
     }
 
     .logo {
       display: block;
-      margin: 0 auto 22px auto;
-      max-width: 180px;
+      margin: 0 auto 16px;
+      height: 64px;
     }
 
     h1 {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       text-align: center;
-      margin-bottom: 6px;
       color: var(--uff-blue);
+      margin-bottom: 8px;
     }
 
-    .subtitle {
+    p.subtitle {
       text-align: center;
       font-size: 0.9rem;
-      margin-bottom: 26px;
-      color: #4b5563;
+      margin-bottom: 24px;
     }
 
     label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
+      font-size: 0.9rem;
       font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
     }
 
     input {
       width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 18px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
       font-size: 0.95rem;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--uff-blue);
-      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
+      margin-bottom: 16px;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
+      padding: 12px;
+      font-size: 1rem;
       background: var(--uff-blue);
       color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 600;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease;
     }
 
-    button:hover {
-      background: #003f7a;
+    button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
     }
 
-    .footer {
-      margin-top: 22px;
+    .erro {
+      color: #b91c1c;
+      font-size: 0.9rem;
       text-align: center;
-      font-size: 0.75rem;
-      color: #6b7280;
+      margin-top: 16px;
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
 
+  <div class="login-card">
     <img
       src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
       alt="Universidade Federal Fluminense"
       class="logo"
-    />
+    >
 
     <h1>Sistema de Prova Digital</h1>
-    <div class="subtitle">
+    <p class="subtitle">
       Universidade Federal Fluminense
-    </div>
+    </p>
 
-    <form id="loginForm">
-      <label for="email">E-mail institucional</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        placeholder="nome@id.uff.br"
-        required
-      />
+    <label for="email">Email institucional</label>
+    <input type="email" id="email" placeholder="nome@id.uff.br" required>
 
-      <label for="matricula">Matrícula</label>
-      <input
-        type="password"
-        id="matricula"
-        name="matricula"
-        placeholder="Digite sua matrícula"
-        required
-      />
+    <label for="matricula">Matrícula</label>
+    <input type="password" id="matricula" placeholder="Digite sua matrícula" required>
 
-      <button type="submit">
-        Validar acesso
-      </button>
-    </form>
+    <button id="btnLogin">Validar acesso</button>
 
-    <div class="footer">
-      Ambiente experimental para avaliações acadêmicas digitais
-    </div>
-
+    <div id="mensagemErro" class="erro"></div>
   </div>
+
+<script>
+  const WEBHOOK_LOGIN = "https://webhook.artideia.com.br/webhook/login-aluno";
+
+  const btnLogin = document.getElementById("btnLogin");
+  const erroDiv = document.getElementById("mensagemErro");
+
+  btnLogin.onclick = async () => {
+    erroDiv.style.display = "none";
+
+    const email = document.getElementById("email").value.trim();
+    const matricula = document.getElementById("matricula").value.trim();
+
+    if (!email || !matricula) {
+      erroDiv.innerText = "Preencha todos os campos.";
+      erroDiv.style.display = "block";
+      return;
+    }
+
+    btnLogin.disabled = true;
+    btnLogin.innerText = "Validando...";
+
+    try {
+      const response = await fetch(WEBHOOK_LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, matricula })
+      });
+
+      const data = await response.json();
+
+      if (data.erro) {
+        erroDiv.innerText = "Acesso não autorizado.";
+        erroDiv.style.display = "block";
+        btnLogin.disabled = false;
+        btnLogin.innerText = "Validar acesso";
+        return;
+      }
+
+      // Login OK → salvar sessão
+      sessionStorage.setItem("session_token", data.session_token);
+      sessionStorage.setItem("expira_em", data.expira_em);
+
+      // Redirecionar para a tela de instruções
+      window.location.href = "instrucoes.html";
+
+    } catch (e) {
+      erroDiv.innerText = "Erro de comunicação com o servidor.";
+      erroDiv.style.display = "block";
+      btnLogin.disabled = false;
+      btnLogin.innerText = "Validar acesso";
+    }
+  };
+</script>
+
 </body>
 </html>
