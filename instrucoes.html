@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instruções – Sistema de Prova Digital UFF</title>
+
+  <style>
+    :root {
+      --uff-blue: #00529b;
+      --uff-light-blue: #e6f0fa;
+      --text-dark: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dark);
+    }
+
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      padding: 36px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto 22px auto;
+      max-width: 180px;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      text-align: center;
+      margin-bottom: 6px;
+      color: var(--uff-blue);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 26px;
+      color: #4b5563;
+    }
+
+    .instructions {
+      font-size: 0.9rem;
+      margin-bottom: 22px;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--uff-blue);
+      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      background: var(--uff-blue);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: not-allowed;
+      opacity: 0.6;
+      transition: background 0.2s ease, opacity 0.2s ease;
+    }
+
+    button.enabled {
+      cursor: pointer;
+      opacity: 1;
+    }
+
+    button.enabled:hover {
+      background: #003f7a;
+    }
+
+    .footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .erro {
+      color: #b91c1c;
+      text-align: center;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <img
+      src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
+      alt="Universidade Federal Fluminense"
+      class="logo"
+    />
+
+    <h1>Instruções da Prova</h1>
+    <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
+
+    <div class="instructions">
+      <ul>
+        <li>Leia atentamente todas as questões antes de responder.</li>
+        <li>Não é permitido abrir outras abas ou aplicativos durante a prova.</li>
+        <li>Qualquer tentativa de fraude será registrada.</li>
+        <li>O botão "Iniciar Prova" será ativado somente quando o professor liberar a prova.</li>
+      </ul>
+    </div>
+
+    <div id="mensagemErro" class="erro"></div>
+
+    <form id="provaForm">
+      <label for="provaId">ID da Prova</label>
+      <input
+        type="text"
+        id="provaId"
+        name="provaId"
+        placeholder="Digite o código da prova"
+        required
+      />
+
+      <button id="btnIniciar" type="submit" disabled>
+        Iniciar Prova
+      </button>
+    </form>
+
+    <div class="footer">
+      Ambiente experimental para avaliações acadêmicas digitais
+    </div>
+
+  </div>
+
+<script>
+  // Verifica se existe sessão válida
+  const sessionToken = sessionStorage.getItem("session_token");
+  const expiraEm = sessionStorage.getItem("expira_em");
+
+  const erroDiv = document.getElementById("mensagemErro");
+  const btn = document.getElementById("btnIniciar");
+  const form = document.getElementById("provaForm");
+
+  if (!sessionToken || !expiraEm || new Date() > new Date(expiraEm)) {
+    erroDiv.innerText = "Sessão inválida ou expirada. Volte para a tela de login.";
+    erroDiv.style.display = "block";
+    form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+  } else {
+    // Botão continua desativado até que professor libere a prova (verificação futura)
+    btn.disabled = true; // Mantido desativado por enquanto
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const provaId = document.getElementById("provaId").value.trim();
+
+    if (!provaId) {
+      erroDiv.innerText = "Digite o código da prova para continuar.";
+      erroDiv.style.display = "block";
+      return;
+    }
+
+    // Para agora apenas salvar prova_id e session no sessionStorage
+    sessionStorage.setItem("prova_id", provaId);
+
+    // Aqui o botão poderia ser habilitado quando a prova estiver EM_EXECUCAO
+    // Ex.: btn.classList.add('enabled'); btn.disabled = false;
+
+    alert("Prova registrada. O botão de início será habilitado quando o professor liberar a prova.");
+  });
+</script>
+
+</body>
+</html>
