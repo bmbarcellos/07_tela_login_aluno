@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Prova Digital – UFF</title>
+  <title>Login do Aluno – Sistema de Prova Digital UFF</title>
 
   <style>
     :root {
       --uff-blue: #00529b;
       --uff-light-blue: #e6f0fa;
-      --uff-gray: #f4f6f8;
       --text-dark: #1f2933;
     }
 
@@ -31,20 +30,20 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 460px;
-      padding: 32px;
+      max-width: 420px;
+      padding: 34px;
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
 
     .logo {
       display: block;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 22px auto;
       max-width: 180px;
     }
 
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       text-align: center;
       margin-bottom: 6px;
       color: var(--uff-blue);
@@ -52,8 +51,8 @@
 
     .subtitle {
       text-align: center;
-      font-size: 0.95rem;
-      margin-bottom: 28px;
+      font-size: 0.9rem;
+      margin-bottom: 26px;
       color: #4b5563;
     }
 
@@ -92,30 +91,12 @@
       transition: background 0.2s ease;
     }
 
-    button:hover:not(:disabled) {
+    button:hover {
       background: #003f7a;
     }
 
-    button:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .info {
-      margin-top: 22px;
-      padding: 16px;
-      background: var(--uff-gray);
-      border-radius: 10px;
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-
-    .info strong {
-      color: var(--uff-blue);
-    }
-
     .footer {
-      margin-top: 18px;
+      margin-top: 22px;
       text-align: center;
       font-size: 0.75rem;
       color: #6b7280;
@@ -160,19 +141,6 @@
         Validar acesso
       </button>
     </form>
-
-    <div class="info">
-      <strong>Instruções da prova</strong><br /><br />
-      • A prova somente poderá ser iniciada após liberação pelo professor.<br />
-      • O tempo de prova começa a contar a partir do início efetivo.<br />
-      • Não é permitido atualizar a página durante a prova.<br />
-      • Tentativas de acesso e ações suspeitas podem ser registradas.<br />
-      • Ao finalizar, suas respostas serão enviadas automaticamente.
-    </div>
-
-    <button style="margin-top: 16px;" disabled>
-      Iniciar Prova
-    </button>
 
     <div class="footer">
       Ambiente experimental para avaliações acadêmicas digitais
