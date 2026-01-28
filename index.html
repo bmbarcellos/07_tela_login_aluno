@@ -2,128 +2,174 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Sistema de Prova Digital – UFF</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login do Aluno – Sistema de Prova Digital UFF</title>
 
   <style>
     :root {
-      --uff-blue: #003366;
-      --uff-light: #f4f6f8;
+      --uff-blue: #00529b;
+      --uff-light-blue: #e6f0fa;
       --text-dark: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--uff-light);
-      color: var(--text-dark);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dark);
     }
 
-    .login-card {
+    .card {
       background: #ffffff;
-      border-radius: 12px;
       width: 100%;
-      max-width: 400px;
-      padding: 32px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      text-align: center;
+      max-width: 420px;
+      padding: 34px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
 
     .logo {
       display: block;
-      margin: 0 auto 16px;
-      height: 64px;
+      margin: 0 auto 22px auto;
+      max-width: 180px;
     }
 
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
+      text-align: center;
+      margin-bottom: 6px;
       color: var(--uff-blue);
-      margin-bottom: 4px;
     }
 
-    p.subtitle {
-      font-size: 0.95rem;
-      margin-bottom: 24px;
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 26px;
+      color: #4b5563;
     }
 
     label {
-      font-size: 0.9rem;
-      font-weight: 600;
       display: block;
+      font-size: 0.85rem;
       margin-bottom: 6px;
-      text-align: left;
+      font-weight: 600;
     }
 
     input {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
       font-size: 0.95rem;
-      margin-bottom: 16px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--uff-blue);
+      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      font-size: 1rem;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
       background: var(--uff-blue);
       color: #ffffff;
-      border: none;
-      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    button:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
+    button:hover {
+      background: #003f7a;
+    }
+
+    .footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
     }
 
     .erro {
       color: #b91c1c;
-      font-size: 0.9rem;
       text-align: center;
-      margin-top: 16px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
       display: none;
     }
   </style>
 </head>
 
 <body>
+  <div class="card">
 
-  <div class="login-card">
     <img
       src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
       alt="Universidade Federal Fluminense"
       class="logo"
-    >
+    />
 
     <h1>Sistema de Prova Digital</h1>
-    <p class="subtitle">Universidade Federal Fluminense</p>
-
-    <label for="email">Email institucional</label>
-    <input type="email" id="email" placeholder="nome@id.uff.br" required>
-
-    <label for="matricula">Matrícula</label>
-    <input type="password" id="matricula" placeholder="Digite sua matrícula" required>
-
-    <button id="btnLogin">Validar acesso</button>
+    <div class="subtitle">
+      Universidade Federal Fluminense
+    </div>
 
     <div id="mensagemErro" class="erro"></div>
+
+    <form id="loginForm">
+      <label for="email">E-mail institucional</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="nome@id.uff.br"
+        required
+      />
+
+      <label for="matricula">Matrícula</label>
+      <input
+        type="password"
+        id="matricula"
+        name="matricula"
+        placeholder="Digite sua matrícula"
+        required
+      />
+
+      <button type="submit">
+        Validar acesso
+      </button>
+    </form>
+
+    <div class="footer">
+      Ambiente experimental para avaliações acadêmicas digitais
+    </div>
+
   </div>
 
 <script>
   const WEBHOOK_LOGIN = "https://webhook.artideia.com.br/webhook/login-aluno";
 
-  const btnLogin = document.getElementById("btnLogin");
+  const form = document.getElementById("loginForm");
   const erroDiv = document.getElementById("mensagemErro");
+  const btn = form.querySelector("button");
 
-  btnLogin.onclick = async () => {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
     erroDiv.style.display = "none";
+    btn.disabled = true;
+    btn.innerText = "Validando...";
 
     const email = document.getElementById("email").value.trim();
     const matricula = document.getElementById("matricula").value.trim();
@@ -131,18 +177,15 @@
     if (!email || !matricula) {
       erroDiv.innerText = "Preencha todos os campos.";
       erroDiv.style.display = "block";
+      btn.disabled = false;
+      btn.innerText = "Validar acesso";
       return;
     }
-
-    btnLogin.disabled = true;
-    btnLogin.innerText = "Validando...";
 
     try {
       const response = await fetch(WEBHOOK_LOGIN, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, matricula })
       });
 
@@ -151,8 +194,8 @@
       if (data.erro) {
         erroDiv.innerText = "Acesso não autorizado.";
         erroDiv.style.display = "block";
-        btnLogin.disabled = false;
-        btnLogin.innerText = "Validar acesso";
+        btn.disabled = false;
+        btn.innerText = "Validar acesso";
         return;
       }
 
@@ -163,13 +206,13 @@
       // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
 
-    } catch (e) {
+    } catch (err) {
       erroDiv.innerText = "Erro de comunicação com o servidor.";
       erroDiv.style.display = "block";
-      btnLogin.disabled = false;
-      btnLogin.innerText = "Validar acesso";
+      btn.disabled = false;
+      btn.innerText = "Validar acesso";
     }
-  };
+  });
 </script>
 
 </body>
