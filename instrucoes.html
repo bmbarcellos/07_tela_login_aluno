@@ -56,6 +56,7 @@
       color: #4b5563;
     }
 
+    /* BLOCO DE BOAS-VINDAS */
     .welcome {
       background: var(--uff-light-blue);
       border-left: 4px solid var(--uff-blue);
@@ -143,13 +144,13 @@
       class="logo"
     />
 
-    <!-- BOAS-VINDAS LOGO ABAIXO DO LOGO -->
+    <h1>Instruções da Prova</h1>
+    <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
+
+    <!-- BOAS-VINDAS PERSONALIZADAS -->
     <div id="welcomeMessage" class="welcome">
       Bem-vindo(a)!
     </div>
-
-    <h1>Instruções da Prova</h1>
-    <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
 
     <div class="instructions">
       <ul>
@@ -194,7 +195,7 @@
     }
   }
 
-  // ===== LÓGICA DE SESSÃO =====
+  // ===== LÓGICA ORIGINAL (INALTERADA) =====
   const sessionToken = sessionStorage.getItem("session_token");
   const expiraEm = sessionStorage.getItem("expira_em");
 
@@ -206,6 +207,8 @@
     erroDiv.innerText = "Sessão inválida ou expirada. Volte para a tela de login.";
     erroDiv.style.display = "block";
     form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+  } else {
+    btn.disabled = true;
   }
 
   form.addEventListener("submit", (e) => {
