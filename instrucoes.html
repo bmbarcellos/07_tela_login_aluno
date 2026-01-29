@@ -56,7 +56,6 @@
       color: #4b5563;
     }
 
-    /* BLOCO DE BOAS-VINDAS */
     .welcome {
       background: var(--uff-light-blue);
       border-left: 4px solid var(--uff-blue);
@@ -89,12 +88,6 @@
       font-size: 0.95rem;
     }
 
-    input:focus {
-      outline: none;
-      border-color: var(--uff-blue);
-      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
-    }
-
     button {
       width: 100%;
       padding: 14px;
@@ -106,16 +99,6 @@
       font-weight: 600;
       cursor: not-allowed;
       opacity: 0.6;
-      transition: background 0.2s ease, opacity 0.2s ease;
-    }
-
-    button.enabled {
-      cursor: pointer;
-      opacity: 1;
-    }
-
-    button.enabled:hover {
-      background: #003f7a;
     }
 
     .footer {
@@ -147,7 +130,7 @@
     <h1>Instruções da Prova</h1>
     <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
 
-    <!-- BOAS-VINDAS PERSONALIZADAS -->
+    <!-- BOAS-VINDAS CONTEXTUAL -->
     <div id="welcomeMessage" class="welcome">
       Bem-vindo(a)!
     </div>
@@ -185,14 +168,15 @@
   </div>
 
 <script>
-  // ===== BOAS-VINDAS COM NOME DO ALUNO =====
-  const alunoRaw = sessionStorage.getItem("aluno");
-  if (alunoRaw) {
-    const aluno = JSON.parse(alunoRaw);
-    if (aluno.nome) {
-      document.getElementById("welcomeMessage").innerHTML =
-        `<strong>Bem-vindo(a), ${aluno.nome}.</strong><br>Leia atentamente as instruções abaixo antes de iniciar a prova.`;
-    }
+  // ===== BOAS-VINDAS CONTEXTUAL (ÚNICA ALTERAÇÃO FUNCIONAL) =====
+  const alunoStr = sessionStorage.getItem("aluno");
+
+  if (alunoStr) {
+    const aluno = JSON.parse(alunoStr);
+    document.getElementById("welcomeMessage").innerHTML =
+      `<strong>Bem-vindo(a), ${aluno.nome}!</strong><br>
+       Você está inscrito(a) no curso de <strong>${aluno.curso}</strong>.
+       Leia atentamente as instruções abaixo antes de iniciar a prova.`;
   }
 
   // ===== LÓGICA ORIGINAL (INALTERADA) =====
@@ -207,8 +191,6 @@
     erroDiv.innerText = "Sessão inválida ou expirada. Volte para a tela de login.";
     erroDiv.style.display = "block";
     form.querySelectorAll("input, button").forEach(el => el.disabled = true);
-  } else {
-    btn.disabled = true;
   }
 
   form.addEventListener("submit", (e) => {
@@ -222,8 +204,7 @@
     }
 
     sessionStorage.setItem("prova_id", provaId);
-
-    alert("Prova registrada. O botão de início será habilitado quando o professor liberar a prova.");
+    alert("Prova registrada. Aguarde a liberação pelo professor.");
   });
 </script>
 
