@@ -191,10 +191,7 @@
 
       const data = await response.json();
 
-      // ===== AJUSTE NECESSÁRIO (ARRAY DO WORKFLOW) =====
-      const payload = Array.isArray(data) ? data[0] : data;
-
-      if (!payload || payload.erro) {
+      if (data.erro) {
         erroDiv.innerText = "Acesso não autorizado.";
         erroDiv.style.display = "block";
         btn.disabled = false;
@@ -203,9 +200,11 @@
       }
 
       // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", payload.session_token);
-      sessionStorage.setItem("expira_em", payload.expira_em);
-      sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
+      sessionStorage.setItem("session_token", data.session_token);
+      sessionStorage.setItem("expira_em", data.expira_em);
+
+      // 🔹 ALTERAÇÃO NECESSÁRIA
+      sessionStorage.setItem("aluno", JSON.stringify(data.aluno));
 
       // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
