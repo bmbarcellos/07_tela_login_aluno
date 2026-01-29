@@ -4,19 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login do Aluno – Sistema de Prova Digital UFF</title>
-
   <style>
     :root {
       --uff-blue: #00529b;
       --uff-light-blue: #e6f0fa;
       --text-dark: #1f2933;
     }
-
     * {
       box-sizing: border-box;
       font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-
     body {
       margin: 0;
       background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
@@ -26,7 +23,6 @@
       justify-content: center;
       color: var(--text-dark);
     }
-
     .card {
       background: #ffffff;
       width: 100%;
@@ -35,34 +31,29 @@
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
-
     .logo {
       display: block;
       margin: 0 auto 22px auto;
       max-width: 180px;
     }
-
     h1 {
       font-size: 1.35rem;
       text-align: center;
       margin-bottom: 6px;
       color: var(--uff-blue);
     }
-
     .subtitle {
       text-align: center;
       font-size: 0.9rem;
       margin-bottom: 26px;
       color: #4b5563;
     }
-
     label {
       display: block;
       font-size: 0.85rem;
       margin-bottom: 6px;
       font-weight: 600;
     }
-
     input {
       width: 100%;
       padding: 12px 14px;
@@ -71,13 +62,6 @@
       border: 1px solid #d1d5db;
       font-size: 0.95rem;
     }
-
-    input:focus {
-      outline: none;
-      border-color: var(--uff-blue);
-      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
-    }
-
     button {
       width: 100%;
       padding: 14px;
@@ -88,20 +72,7 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s ease;
     }
-
-    button:hover {
-      background: #003f7a;
-    }
-
-    .footer {
-      margin-top: 22px;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-
     .erro {
       color: #b91c1c;
       text-align: center;
@@ -113,110 +84,65 @@
 </head>
 
 <body>
-  <div class="card">
+<div class="card">
 
-    <img
-      src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
-      alt="Universidade Federal Fluminense"
-      class="logo"
-    />
+  <img src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
+       alt="Universidade Federal Fluminense"
+       class="logo" />
 
-    <h1>Sistema de Prova Digital</h1>
-    <div class="subtitle">
-      Universidade Federal Fluminense
-    </div>
+  <h1>Sistema de Prova Digital</h1>
+  <div class="subtitle">Universidade Federal Fluminense</div>
 
-    <div id="mensagemErro" class="erro"></div>
+  <div id="mensagemErro" class="erro"></div>
 
-    <form id="loginForm">
-      <label for="email">E-mail institucional</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        placeholder="nome@id.uff.br"
-        required
-      />
+  <form id="loginForm">
+    <label>E-mail institucional</label>
+    <input type="email" id="email" required />
+    <label>Matrícula</label>
+    <input type="password" id="matricula" required />
+    <button type="submit">Validar acesso</button>
+  </form>
 
-      <label for="matricula">Matrícula</label>
-      <input
-        type="password"
-        id="matricula"
-        name="matricula"
-        placeholder="Digite sua matrícula"
-        required
-      />
-
-      <button type="submit">
-        Validar acesso
-      </button>
-    </form>
-
-    <div class="footer">
-      Ambiente experimental para avaliações acadêmicas digitais
-    </div>
-
-  </div>
+</div>
 
 <script>
-  const WEBHOOK_LOGIN = "https://webhook.artideia.com.br/webhook/login-aluno";
+const WEBHOOK_LOGIN = "https://webhook.artideia.com.br/webhook/login-aluno";
+const form = document.getElementById("loginForm");
+const erroDiv = document.getElementById("mensagemErro");
 
-  const form = document.getElementById("loginForm");
-  const erroDiv = document.getElementById("mensagemErro");
-  const btn = form.querySelector("button");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    erroDiv.style.display = "none";
-    btn.disabled = true;
-    btn.innerText = "Validando...";
+  const email = email.value.trim();
+  const matricula = matricula.value.trim();
 
-    const email = document.getElementById("email").value.trim();
-    const matricula = document.getElementById("matricula").value.trim();
+  try {
+    const res = await fetch(WEBHOOK_LOGIN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, matricula })
+    });
 
-    if (!email || !matricula) {
-      erroDiv.innerText = "Preencha todos os campos.";
+    const data = await res.json();
+    const payload = data[0]; // 🔑 CORREÇÃO CRÍTICA
+
+    if (payload.erro) {
+      erroDiv.innerText = "Acesso não autorizado.";
       erroDiv.style.display = "block";
-      btn.disabled = false;
-      btn.innerText = "Validar acesso";
       return;
     }
 
-    try {
-      const response = await fetch(WEBHOOK_LOGIN, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, matricula })
-      });
+    sessionStorage.setItem("session_token", payload.session_token);
+    sessionStorage.setItem("expira_em", payload.expira_em);
+    sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
 
-      const data = await response.json();
+    window.location.href = "instrucoes.html";
 
-      if (data.erro) {
-        erroDiv.innerText = "Acesso não autorizado.";
-        erroDiv.style.display = "block";
-        btn.disabled = false;
-        btn.innerText = "Validar acesso";
-        return;
-      }
-
-      // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", data.session_token);
-      sessionStorage.setItem("expira_em", data.expira_em);
-
-      // 🔹 ALTERAÇÃO NECESSÁRIA
-      sessionStorage.setItem("aluno", JSON.stringify(data.aluno));
-
-      // Redirecionar para a tela de instruções
-      window.location.href = "instrucoes.html";
-
-    } catch (err) {
-      erroDiv.innerText = "Erro de comunicação com o servidor.";
-      erroDiv.style.display = "block";
-      btn.disabled = false;
-      btn.innerText = "Validar acesso";
-    }
-  });
+  } catch {
+    erroDiv.innerText = "Erro de comunicação.";
+    erroDiv.style.display = "block";
+  }
+});
 </script>
-
 </body>
 </html>
