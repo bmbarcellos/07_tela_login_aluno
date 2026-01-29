@@ -191,7 +191,8 @@
 
       const data = await response.json();
 
-      if (data.erro) {
+      // ===== AJUSTE NECESSÁRIO: retorno é ARRAY =====
+      if (!Array.isArray(data) || data[0]?.login !== "OK") {
         erroDiv.innerText = "Acesso não autorizado.";
         erroDiv.style.display = "block";
         btn.disabled = false;
@@ -199,12 +200,10 @@
         return;
       }
 
-      // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", data.session_token);
-      sessionStorage.setItem("expira_em", data.expira_em);
-
-      // 🔹 AJUSTE NECESSÁRIO: salvar dados do aluno
-      sessionStorage.setItem("aluno", JSON.stringify(data.aluno));
+      // Login OK → salvar sessão e dados do aluno
+      sessionStorage.setItem("session_token", data[0].session_token);
+      sessionStorage.setItem("expira_em", data[0].expira_em);
+      sessionStorage.setItem("aluno", JSON.stringify(data[0].aluno));
 
       // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
