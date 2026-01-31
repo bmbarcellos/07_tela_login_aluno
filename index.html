@@ -88,11 +88,11 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    button:disabled {
-      opacity: 0.7;
-      cursor: default;
+    button:hover {
+      background: #003f7a;
     }
 
     .footer {
@@ -147,7 +147,9 @@
         required
       />
 
-      <button type="submit">Validar acesso</button>
+      <button type="submit">
+        Validar acesso
+      </button>
     </form>
 
     <div class="footer">
@@ -165,7 +167,6 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     erroDiv.style.display = "none";
     btn.disabled = true;
     btn.innerText = "Validando...";
@@ -188,16 +189,9 @@
         body: JSON.stringify({ email, matricula })
       });
 
-      // ✅ AJUSTE CRÍTICO
-      if (!response.ok) {
-        throw new Error("Falha na comunicação com o servidor");
-      }
-
       const data = await response.json();
 
-      Resposta inválida do servidor
-
-      if (payload.login !== "OK" || !payload.aluno) {
+      if (data.erro) {
         erroDiv.innerText = "Acesso não autorizado.";
         erroDiv.style.display = "block";
         btn.disabled = false;
@@ -205,15 +199,15 @@
         return;
       }
 
-      sessionStorage.setItem("session_token", payload.session_token);
-      sessionStorage.setItem("expira_em", payload.expira_em);
-      sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
+      // Login OK → salvar sessão
+      sessionStorage.setItem("session_token", data.session_token);
+      sessionStorage.setItem("expira_em", data.expira_em);
 
+      // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
 
     } catch (err) {
-      console.error(err);
-      erroDiv.innerText = err.message || "Erro inesperado.";
+      erroDiv.innerText = "Erro de comunicação com o servidor.";
       erroDiv.style.display = "block";
       btn.disabled = false;
       btn.innerText = "Validar acesso";
