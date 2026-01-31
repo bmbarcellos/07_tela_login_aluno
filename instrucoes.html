@@ -9,6 +9,7 @@
     :root {
       --uff-blue: #00529b;
       --uff-light-blue: #e6f0fa;
+      --uff-welcome-blue: #7da6e0; /* azul mais claro para o retângulo de boas-vindas */
       --text-dark: #1f2933;
     }
 
@@ -30,7 +31,7 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 680px;
+      max-width: 680px; /* ajustado para ter mesma largura da página 1 */
       padding: 34px;
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
@@ -42,9 +43,8 @@
       max-width: 180px;
     }
 
-    /* 🔹 AJUSTE FINAL: azul mais claro */
     .welcome {
-      background: var(--uff-blue);
+      background: var(--uff-welcome-blue);
       color: #ffffff;
       padding: 14px 18px;
       border-radius: 10px;
@@ -132,8 +132,13 @@
     </div>
 
     <div class="instructions">
-      <p>Leia atentamente as instruções antes de iniciar a prova.</p>
-      <p>A prova só poderá ser acessada após liberação do professor.</p>
+      <p>1. Leia atentamente todas as questões antes de responder.</p>
+      <p>2. Mantenha-se com a prova em <strong>tela cheia</strong>; qualquer tentativa de sair do modo fullscreen será registrada.</p>
+      <p>3. Não alterne entre abas ou janelas do navegador durante a prova.</p>
+      <p>4. Evite atualizar ou recarregar a página; isso pode invalidar sua sessão.</p>
+      <p>5. Todas as respostas são registradas e salvas automaticamente.</p>
+      <p>6. Qualquer comportamento fora do esperado será registrado e analisado pelo sistema.</p>
+      <p>✅ <strong>Boa prova!</strong></p>
     </div>
 
     <div id="mensagemErro" class="erro"></div>
