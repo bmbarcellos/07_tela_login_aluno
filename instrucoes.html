@@ -38,8 +38,17 @@
 
     .logo {
       display: block;
-      margin: 0 auto 18px auto;
+      margin: 0 auto 16px auto;
       max-width: 180px;
+    }
+
+    .welcome {
+      background: var(--uff-light-blue);
+      border-left: 4px solid var(--uff-blue);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 22px;
     }
 
     h1 {
@@ -54,15 +63,6 @@
       font-size: 0.9rem;
       margin-bottom: 18px;
       color: #4b5563;
-    }
-
-    .welcome {
-      background: var(--uff-light-blue);
-      border-left: 4px solid var(--uff-blue);
-      padding: 14px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
     }
 
     .instructions {
@@ -137,17 +137,19 @@
 <body>
   <div class="card">
 
+    <!-- LOGO -->
     <img
       src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
       alt="Universidade Federal Fluminense"
       class="logo"
     />
 
-    <!-- BOAS-VINDAS PERSONALIZADAS (NOVA POSIÇÃO) -->
+    <!-- BOAS-VINDAS (ABAIXO DO LOGO) -->
     <div id="welcomeMessage" class="welcome">
       Bem-vindo(a)!
     </div>
 
+    <!-- TÍTULO -->
     <h1>Instruções da Prova</h1>
     <div class="subtitle">
       Sistema de Prova Digital – Universidade Federal Fluminense
@@ -209,8 +211,6 @@
     erroDiv.innerText = "Sessão inválida ou expirada. Volte para a tela de login.";
     erroDiv.style.display = "block";
     form.querySelectorAll("input, button").forEach(el => el.disabled = true);
-  } else {
-    btn.disabled = true;
   }
 
   form.addEventListener("submit", (e) => {
