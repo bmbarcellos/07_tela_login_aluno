@@ -31,7 +31,7 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 680px; /* ajustado para ter mesma largura da página 1 */
+      max-width: 480px; /* padronizado com a página 1 */
       padding: 34px;
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
@@ -71,6 +71,12 @@
       font-size: 0.9rem;
       line-height: 1.5;
       margin-bottom: 26px;
+      text-align: left;
+    }
+
+    .instructions p:last-child {
+      text-align: center; /* centraliza a mensagem de boa prova */
+      font-weight: bold;
     }
 
     label {
@@ -82,15 +88,18 @@
 
     input {
       width: 100%;
+      max-width: 100%; /* padronizado */
       padding: 12px 14px;
       margin-bottom: 18px;
       border-radius: 8px;
       border: 1px solid #d1d5db;
       font-size: 0.95rem;
+      box-sizing: border-box;
     }
 
     button {
       width: 100%;
+      max-width: 100%; /* padronizado */
       padding: 14px;
       border-radius: 10px;
       border: none;
@@ -99,6 +108,7 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
+      box-sizing: border-box;
     }
 
     button:hover {
