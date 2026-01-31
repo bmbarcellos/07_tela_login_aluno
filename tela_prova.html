@@ -45,21 +45,6 @@
       border-radius: 10px;
       padding: 32px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      position: relative;
-    }
-
-    .loading {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.85);
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--uff-blue);
-      border-radius: 10px;
-      z-index: 10;
     }
 
     .prova-info {
@@ -135,13 +120,11 @@
 <body>
 
 <header>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Logo_UFF_%28blue%29.svg" alt="UFF">
+  <img src="assets/logo-uff.png" alt="UFF">
   <div class="title">Universidade Federal Fluminense</div>
 </header>
 
 <main>
-
-  <div id="loading" class="loading">Carregando a prova...</div>
 
   <div id="mensagemErro" class="erro"></div>
 
@@ -165,6 +148,9 @@
   let violacoes = [];
   let provaFinalizada = false;
 
+  // ===============================
+  // FUNÇÕES EXISTENTES
+  // ===============================
   function registrarViolacao(tipo) {
     if (provaFinalizada) return;
     violacoes.push({
@@ -185,7 +171,7 @@
     intervaloTimer = setInterval(() => {
       const diff = fim - new Date();
       if (diff <= 0) {
-        registrarViolacao("TEMPO_ENCERRADO");
+        violacao("TEMPO_ENCERRADO");
         clearInterval(intervaloTimer);
         enviarProva();
         return;
@@ -320,15 +306,65 @@
 
   provaAtual = JSON.parse(provaRaw);
 
-  // Renderização após carregamento
-  window.addEventListener("load", () => {
-    document.getElementById("provaId").innerText = provaAtual.prova_id;
-    iniciarCronometro(provaAtual.fim);
-    renderizarQuestoes(provaAtual.questoes);
-    intervaloAutosave = setInterval(autosave, 60000);
-    document.getElementById("btnEnviar").onclick = enviarProva;
-    document.getElementById("loading").style.display = "none"; // oculta mensagem de carregando
+  document.getElementById("provaId").innerText = provaAtual.prova_id;
+  iniciarCronometro(provaAtual.fim);
+  renderizarQuestoes(provaAtual.questoes);
+
+  intervaloAutosave = setInterval(autosave, 60000);
+
+  document.getElementById("btnEnviar").onclick = enviarProva;
+
+  // ===============================
+  // ANTI-FRAUDE: FULLSCREEN E FOCO
+  // ===============================
+  let violacoesAtivas = {};
+
+  function bloquearProva() {
+    document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = true);
+    document.getElementById("btnEnviar").disabled = true;
+  }
+
+  function desbloquearProva() {
+    document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = false);
+    document.getElementById("btnEnviar").disabled = false;
+  }
+
+  function violacao(tipo) {
+    violacoesAtivas[tipo] = (violacoesAtivas[tipo] || 0) + 1;
+    registrarViolacao(tipo);
+
+    if (violacoesAtivas[tipo] === 1) {
+      bloquearProva();
+      alert("⚠️ Você violou uma instrução da prova (ex: saiu do fullscreen ou mudou de aba). Esta ação foi registrada.");
+      setTimeout(() => desbloquearProva(), 2000);
+    } else {
+      alert("🚨 Você cometeu a mesma violação novamente. A prova será encerrada.");
+      enviarProva();
+    }
+  }
+
+  async function forcarFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch(e) {
+      console.warn("Erro ao tentar fullscreen:", e);
+    }
+  }
+
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      violacao("SAIU_FULLSCREEN");
+    }
   });
+
+  window.addEventListener("blur", () => {
+    violacao("PERDEU_FOCO");
+  });
+
+  // ativa fullscreen ao carregar
+  forcarFullscreen();
 </script>
 
 </body>
