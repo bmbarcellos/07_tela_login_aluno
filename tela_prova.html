@@ -249,7 +249,7 @@
       timestamp: new Date().toISOString()
     };
 
-    const hash = provaAtual.hash || "";
+    const hash = provaAtual.hash_prova || "";
 
     fetch(WEBHOOK_AUTOSAVE, {
       method: "POST",
@@ -287,6 +287,19 @@
   }
 
   // ===============================
+  // FORÇAR FULLSCREEN
+  // ===============================
+  async function forcarFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn("Não foi possível ativar fullscreen automaticamente:", e);
+    }
+  }
+
+  // ===============================
   // CARGA DA PROVA
   // ===============================
   const provaRaw = sessionStorage.getItem("prova");
@@ -297,6 +310,9 @@
   }
 
   provaAtual = JSON.parse(provaRaw);
+
+  // Forçar fullscreen antes de renderizar
+  forcarFullscreen();
 
   document.getElementById("provaId").innerText = provaAtual.prova_id;
   iniciarCronometro(provaAtual.fim);
