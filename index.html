@@ -203,11 +203,11 @@
       }
 
       // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", payload.session_token);
-      sessionStorage.setItem("expira_em", payload.expira_em);
+      sessionStorage.setItem("session_token", data.session_token);
+      sessionStorage.setItem("expira_em", data.expira_em);
 
       // Persistir dados do aluno para a Página 2
-      sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
+      sessionStorage.setItem("aluno", JSON.stringify(data.aluno));
 
       // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
