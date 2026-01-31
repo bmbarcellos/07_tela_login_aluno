@@ -315,9 +315,10 @@
   document.getElementById("btnEnviar").onclick = enviarProva;
 
   // ===============================
-  // ANTI-FRAUDE: FULLSCREEN, FOCO, COPY/PASTE/PRINT
+  // ANTI-FRAUDE: FULLSCREEN, FOCO, COPY/PASTE/PRINT, TROCA DE ABAS
   // ===============================
   let violacoesAtivas = {};
+  let ultimaTrocaAba = Date.now();
 
   function bloquearProva() {
     document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = true);
@@ -335,7 +336,7 @@
 
     if (violacoesAtivas[tipo] === 1) {
       bloquearProva();
-      alert("⚠️ Você violou uma instrução da prova (ex: saiu do fullscreen, mudou de aba ou tentou copiar/colar). Esta ação foi registrada.");
+      alert("⚠️ Você violou uma instrução da prova: " + tipo + ". Esta ação foi registrada.");
       setTimeout(() => desbloquearProva(), 2000);
     } else {
       alert("🚨 Você cometeu a mesma violação novamente. A prova será encerrada.");
@@ -354,13 +355,16 @@
   }
 
   document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) {
-      violacao("SAIU_FULLSCREEN");
-    }
+    if (!document.fullscreenElement) violacao("SAIU_FULLSCREEN");
   });
 
   window.addEventListener("blur", () => {
-    violacao("PERDEU_FOCO");
+    const agora = Date.now();
+    // Ignora pequenas perdas de foco (<500ms) para evitar falsos positivos
+    if (agora - ultimaTrocaAba > 500) {
+      violacao("PERDEU_FOCO");
+      ultimaTrocaAba = agora;
+    }
   });
 
   // Bloqueio de copiar, colar, recortar, clique direito e imprimir
