@@ -1,1 +1,333 @@
+<!DOCTYPE html> 
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prova Online – UFF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <style>
+    :root {
+      --uff-blue: #003366;
+      --uff-gray: #f4f6f8;
+      --text-dark: #1f2933;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--uff-gray);
+      color: var(--text-dark);
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header img {
+      height: 48px;
+    }
+
+    header .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--uff-blue);
+    }
+
+    main {
+      max-width: 900px;
+      margin: 24px auto;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 32px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .prova-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      background: var(--uff-blue);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+
+    .timer {
+      font-weight: bold;
+      color: #b91c1c;
+    }
+
+    .questao {
+      margin-bottom: 32px;
+    }
+
+    .alternativas label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .correlacao {
+      margin-top: 12px;
+    }
+
+    .par {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .par span {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .par select {
+      flex: 1;
+      padding: 6px;
+    }
+
+    .erro {
+      color: #b91c1c;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      display: block;
+      margin: 32px auto 0;
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: var(--uff-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Logo_UFF_%28blue%29.svg" alt="UFF">
+  <div class="title">Universidade Federal Fluminense</div>
+</header>
+
+<main>
+  <button id="btnIniciar" class="btn">Iniciar prova</button>
+
+  <div id="mensagemErro" class="erro"></div>
+
+  <div class="prova-info" id="infoProva" style="display:none">
+    <div class="badge" id="provaId"></div>
+    <div class="timer" id="cronometro"></div>
+  </div>
+
+  <div id="questoes"></div>
+
+  <button id="btnEnviar" class="btn" style="display:none">Enviar prova</button>
+</main>
+
+<script>
+  const WEBHOOK_RENDER = "https://webhook.artideia.com.br/webhook/renderizar_prova";
+  const WEBHOOK_SUBMIT = "https://webhook.artideia.com.br/webhook/submeter_prova";
+  const WEBHOOK_AUTOSAVE = "https://webhook.artideia.com.br/webhook/autosave_prova";
+
+  let provaAtual = null;
+  let intervaloTimer = null;
+  let intervaloAutosave = null;
+  let violacoes = [];
+  let provaFinalizada = false;
+
+  function registrarViolacao(tipo) {
+    if (provaFinalizada) return;
+    violacoes.push({
+      tipo,
+      timestamp: new Date().toISOString(),
+      user_agent: navigator.userAgent
+    });
+  }
+
+  function criarDataHoje(hora) {
+    const [h,m,s] = hora.split(":").map(Number);
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m, s);
+  }
+
+  function iniciarCronometro(fimHora) {
+    const fim = criarDataHoje(fimHora);
+    intervaloTimer = setInterval(() => {
+      const diff = fim - new Date();
+      if (diff <= 0) {
+        registrarViolacao("TEMPO_ENCERRADO");
+        clearInterval(intervaloTimer);
+        enviarProva();
+        return;
+      }
+      const s = Math.floor(diff / 1000);
+      document.getElementById("cronometro").innerText =
+        `Tempo restante: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+    }, 1000);
+  }
+
+  function renderizarQuestoes(questoes) {
+    const c = document.getElementById("questoes");
+    c.innerHTML = "";
+
+    questoes.forEach((q,i) => {
+      let corpo = "";
+
+      if (q.Tipo_questao === "multipla") {
+        corpo = q.Alternativas.map((a,j)=>`
+          <label>
+            <input type="radio" name="q${i}" value="${j}">
+            ${a.texto}
+          </label>
+        `).join("");
+      }
+
+      if (q.Tipo_questao === "correlacao" && q.Pares) {
+        const opcoes = q.Pares.map(p => p.direita);
+        corpo = `
+          <div class="correlacao">
+            ${q.Pares.map((p,j)=>`
+              <div class="par">
+                <span>${p.esquerda}</span>
+                <select name="q${i}_p${j}">
+                  <option value="">Selecione</option>
+                  ${opcoes.map(o=>`<option value="${o}">${o}</option>`).join("")}
+                </select>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      c.innerHTML += `
+        <div class="questao">
+          <h3>${i+1}. ${q.Enunciado}</h3>
+          ${q.Imagem ? `<img src="${q.Imagem}" style="max-width:100%; margin:12px 0; border-radius:8px;">` : ""}
+          <div class="alternativas">${corpo}</div>
+        </div>
+      `;
+    });
+  }
+
+  function coletarRespostas() {
+    const respostas = {};
+    provaAtual.questoes.forEach((q,i)=>{
+      if (q.Tipo_questao === "multipla") {
+        const marcada = document.querySelector(`input[name="q${i}"]:checked`);
+        respostas[`q${i}`] = marcada ? marcada.value : null;
+      }
+      if (q.Tipo_questao === "correlacao") {
+        respostas[`q${i}`] = {};
+        q.Pares.forEach((_,j)=>{
+          const sel = document.querySelector(`select[name="q${i}_p${j}"]`);
+          respostas[`q${i}`][`p${j}`] = sel ? sel.value : null;
+        });
+      }
+    });
+    return respostas;
+  }
+
+  async function gerarHashSHA256(texto) {
+    const enc = new TextEncoder().encode(texto);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2,"0"))
+      .join("");
+  }
+
+  async function autosave() {
+    const payload = {
+      prova_id: provaAtual.prova_id,
+      respostas: coletarRespostas(),
+      violacoes,
+      timestamp: new Date().toISOString()
+    };
+
+    const hash = await gerarHashSHA256(JSON.stringify(payload));
+
+    fetch(WEBHOOK_AUTOSAVE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload, hash })
+    });
+  }
+
+  async function enviarProva() {
+    if (provaFinalizada) return;
+    provaFinalizada = true;
+
+    registrarViolacao("SUBMISSAO_MANUAL");
+    clearInterval(intervaloAutosave);
+
+    const payload = {
+      prova_id: provaAtual.prova_id,
+      respostas: coletarRespostas(),
+      violacoes,
+      timestamp: new Date().toISOString(),
+      user_agent: navigator.userAgent
+    };
+
+    const hash = await gerarHashSHA256(JSON.stringify(payload));
+
+    await fetch(WEBHOOK_SUBMIT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload, hash })
+    });
+
+    alert("✅ Prova enviada com sucesso.");
+  }
+
+  async function carregarProva() {
+    const r = await fetch(WEBHOOK_RENDER);
+    const j = await r.json();
+    provaAtual = Array.isArray(j) ? j[0] : j;
+
+    document.getElementById("provaId").innerText = provaAtual.prova_id;
+    document.getElementById("infoProva").style.display = "flex";
+    document.getElementById("btnEnviar").style.display = "block";
+
+    iniciarCronometro(provaAtual.fim);
+    renderizarQuestoes(provaAtual.questoes);
+
+    intervaloAutosave = setInterval(autosave, 60000);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) registrarViolacao("TROCA_DE_ABA");
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
+  });
+
+  window.addEventListener("beforeunload", () => {
+    registrarViolacao("RELOAD_OU_SAIDA");
+  });
+
+  document.getElementById("btnIniciar").onclick = async () => {
+    await document.documentElement.requestFullscreen();
+    document.getElementById("btnIniciar").style.display = "none";
+    carregarProva();
+  };
+
+  document.getElementById("btnEnviar").onclick = enviarProva;
+</script>
+
+</body>
+</html>
