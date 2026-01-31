@@ -1,70 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prova Concluída – UFF</title>
+
   <style>
     :root {
       --uff-blue: #003366;
       --uff-light-blue: #e6f0fa;
       --text-dark: #1f2933;
+      --accent: #00529b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--uff-light-blue), #ffffff);
       color: var(--text-dark);
       text-align: center;
       padding: 24px;
     }
 
-    img.logo {
-      max-width: 180px;
-      margin-bottom: 24px;
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
     }
 
-    h1 {
-      font-size: 2rem;
-      color: var(--uff-blue);
+    header img {
+      height: 80px;
       margin-bottom: 16px;
     }
 
-    p {
-      font-size: 1.1rem;
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--uff-blue);
+      margin-bottom: 8px;
+    }
+
+    main {
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    main h2 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    main p {
+      font-size: 1rem;
+      line-height: 1.6;
       margin-bottom: 24px;
     }
 
-    .btn-home {
+    .btn {
+      display: inline-block;
       padding: 12px 24px;
       font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
       background: var(--uff-blue);
-      color: white;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
       text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s;
     }
 
-    .btn-home:hover {
+    .btn:hover {
       background: #001f4d;
     }
   </style>
 </head>
+
 <body>
 
-  <img src="assets/logo-uff.png" alt="UFF" class="logo">
+<header>
+  <img src="assets/logo-uff.png" alt="UFF">
+  <h1>Universidade Federal Fluminense</h1>
+</header>
 
-  <h1>Prova Concluída!</h1>
-  <p>Parabéns, sua prova foi enviada com sucesso.<br>Desejamos boa sorte nos resultados!</p>
-
-  <a href="index.html" class="btn-home">Voltar à página inicial</a>
+<main>
+  <h2>✅ Prova Concluída!</h2>
+  <p>Parabéns, sua prova foi enviada com sucesso. Desejamos boa sorte na correção e que seus resultados reflitam seu esforço e dedicação.</p>
+  <a href="index.html" class="btn">Voltar à Página Inicial</a>
+</main>
 
 </body>
 </html>
