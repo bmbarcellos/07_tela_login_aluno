@@ -195,11 +195,7 @@
 
       const data = await response.json();
 
-      if (!Array.isArray(data) || !data[0]) {
-        throw new Error("Resposta inválida do servidor");
-      }
-
-      const payload = data[0];
+      Resposta inválida do servidor
 
       if (payload.login !== "OK" || !payload.aluno) {
         erroDiv.innerText = "Acesso não autorizado.";
