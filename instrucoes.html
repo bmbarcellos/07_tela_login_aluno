@@ -42,6 +42,7 @@
       max-width: 180px;
     }
 
+    /* 🔹 AJUSTE FINAL: azul mais claro */
     .welcome {
       background: var(--uff-blue);
       color: #ffffff;
@@ -123,7 +124,6 @@
       class="logo"
     />
 
-    <!-- Mensagem de boas-vindas -->
     <div id="welcomeMessage" class="welcome"></div>
 
     <h1>Instruções da Prova</h1>
@@ -138,7 +138,6 @@
 
     <div id="mensagemErro" class="erro"></div>
 
-    <!-- 🔹 AJUSTE NECESSÁRIO: campo do ID da prova -->
     <label for="provaId">ID da Prova</label>
     <input
       type="text"
@@ -147,7 +146,6 @@
       required
     />
 
-    <!-- 🔹 AJUSTE NECESSÁRIO: botão iniciar prova -->
     <button id="btnIniciarProva">
       Iniciar prova
     </button>
@@ -160,7 +158,6 @@
 
   const erroDiv = document.getElementById("mensagemErro");
 
-  // Recupera aluno da sessão
   const alunoRaw = sessionStorage.getItem("aluno");
   if (!alunoRaw) {
     window.location.href = "index.html";
@@ -168,11 +165,9 @@
 
   const aluno = JSON.parse(alunoRaw);
 
-  // Exibe mensagem de boas-vindas
   document.getElementById("welcomeMessage").innerHTML =
     `<strong>Bem-vindo(a), ${aluno.nome}</strong>`;
 
-  // Handler do botão
   document
     .getElementById("btnIniciarProva")
     .addEventListener("click", async () => {
@@ -209,7 +204,6 @@
           return;
         }
 
-        // Guarda a prova para a próxima página
         sessionStorage.setItem("prova", JSON.stringify(data));
         sessionStorage.setItem("prova_id", provaId);
 
