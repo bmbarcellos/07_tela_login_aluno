@@ -45,7 +45,6 @@
       border-radius: 10px;
       padding: 32px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      position: relative;
     }
 
     .prova-info {
@@ -115,21 +114,6 @@
       border-radius: 8px;
       cursor: pointer;
     }
-
-    /* AVISO DISCRETO DE VIOLAÇÃO */
-    #avisoViolacao {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fcd34d;
-      color: #78350f;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      display: none;
-      z-index: 1000;
-    }
   </style>
 </head>
 
@@ -141,8 +125,6 @@
 </header>
 
 <main>
-
-  <div id="avisoViolacao"></div>
 
   <div id="mensagemErro" class="erro"></div>
 
@@ -166,16 +148,14 @@
   let violacoes = [];
   let provaFinalizada = false;
 
-  // ===============================
-  // FUNÇÕES EXISTENTES
-  // ===============================
   function registrarViolacao(tipo) {
     if (provaFinalizada) return;
-    violacoes.push({
-      tipo,
-      timestamp: new Date().toISOString(),
-      user_agent: navigator.userAgent
-    });
+    if (violacoes.includes(tipo)) {
+      enviarProva(); // Segunda violação encerra prova
+    } else {
+      violacoes.push(tipo);
+      alert(`⚠️ Violação detectada: ${tipo}`);
+    }
   }
 
   function criarDataHoje(hora) {
@@ -189,7 +169,7 @@
     intervaloTimer = setInterval(() => {
       const diff = fim - new Date();
       if (diff <= 0) {
-        violacao("TEMPO_ENCERRADO");
+        registrarViolacao("TEMPO_ENCERRADO");
         clearInterval(intervaloTimer);
         enviarProva();
         return;
@@ -261,14 +241,6 @@
     return respostas;
   }
 
-  async function gerarHashSHA256(texto) {
-    const enc = new TextEncoder().encode(texto);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", enc);
-    return Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2,"0"))
-      .join("");
-  }
-
   async function autosave() {
     const payload = {
       prova_id: provaAtual.prova_id,
@@ -277,7 +249,7 @@
       timestamp: new Date().toISOString()
     };
 
-    const hash = await gerarHashSHA256(JSON.stringify(payload));
+    const hash = provaAtual.hash || "";
 
     fetch(WEBHOOK_AUTOSAVE, {
       method: "POST",
@@ -289,19 +261,21 @@
   async function enviarProva() {
     if (provaFinalizada) return;
     provaFinalizada = true;
-
-    registrarViolacao("SUBMISSAO_MANUAL");
     clearInterval(intervaloAutosave);
+
+    const aluno = JSON.parse(sessionStorage.getItem("aluno") || "{}");
 
     const payload = {
       prova_id: provaAtual.prova_id,
       respostas: coletarRespostas(),
       violacoes,
       timestamp: new Date().toISOString(),
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      aluno
     };
 
-    const hash = await gerarHashSHA256(JSON.stringify(payload));
+    // USAR O HASH VINDO DA PÁGINA 2
+    const hash = provaAtual.hash || "";
 
     await fetch(WEBHOOK_SUBMIT, {
       method: "POST",
@@ -313,7 +287,7 @@
   }
 
   // ===============================
-  // CARGA DIRETA DA PROVA VALIDADA
+  // CARGA DA PROVA
   // ===============================
   const provaRaw = sessionStorage.getItem("prova");
   if (!provaRaw) {
@@ -333,92 +307,15 @@
   document.getElementById("btnEnviar").onclick = enviarProva;
 
   // ===============================
-  // ANTI-FRAUDE
+  // DETECÇÃO ANTI-FRAUDE (FULLSCREEN / PERDA DE FOCO)
   // ===============================
-  let violacoesAtivas = {};
-  let ultimaTrocaAba = Date.now();
-  const ABA_STORAGE_KEY = `prova_aberta_${provaAtual.prova_id}`;
-  localStorage.setItem(ABA_STORAGE_KEY, Date.now());
-
-  function bloquearProva() {
-    document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = true);
-    document.getElementById("btnEnviar").disabled = true;
-  }
-
-  function desbloquearProva() {
-    document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = false);
-    document.getElementById("btnEnviar").disabled = false;
-  }
-
-  function mostrarAviso(texto) {
-    const div = document.getElementById("avisoViolacao");
-    div.innerText = texto;
-    div.style.display = "block";
-    setTimeout(() => div.style.display = "none", 3500);
-  }
-
-  function violacao(tipo) {
-    violacoesAtivas[tipo] = (violacoesAtivas[tipo] || 0) + 1;
-    registrarViolacao(tipo);
-
-    if (violacoesAtivas[tipo] === 1) {
-      bloquearProva();
-      mostrarAviso("⚠️ Você violou uma instrução da prova: " + tipo);
-      setTimeout(() => desbloquearProva(), 2000);
-    } else {
-      alert("🚨 Você cometeu a mesma violação novamente. A prova será encerrada.");
-      enviarProva();
-    }
-  }
-
-  async function forcarFullscreen() {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch(e) {
-      console.warn("Erro ao tentar fullscreen:", e);
-    }
-  }
-
   document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) violacao("SAIU_FULLSCREEN");
+    if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
   });
 
-  window.addEventListener("blur", () => {
-    const agora = Date.now();
-    if (agora - ultimaTrocaAba > 500) {
-      violacao("PERDEU_FOCO");
-      ultimaTrocaAba = agora;
-    }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) registrarViolacao("TROCA_DE_ABA");
   });
-
-  document.addEventListener("copy", e => { e.preventDefault(); violacao("COPIAR"); });
-  document.addEventListener("cut", e => { e.preventDefault(); violacao("RECORTAR"); });
-  document.addEventListener("paste", e => { e.preventDefault(); violacao("COLAR"); });
-  document.addEventListener("contextmenu", e => { e.preventDefault(); violacao("BOTAO_DIREITO"); });
-  window.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
-      e.preventDefault();
-      violacao("IMPRIMIR");
-    }
-  });
-
-  // ===============================
-  // DETECÇÃO DE MULTIPLAS ABAS
-  // ===============================
-  window.addEventListener("storage", (e) => {
-    if (e.key === ABA_STORAGE_KEY && e.newValue != null) {
-      violacao("MULTIPLAS_ABAS");
-    }
-  });
-
-  setInterval(() => {
-    localStorage.setItem(ABA_STORAGE_KEY, Date.now());
-  }, 1000);
-
-  // ativa fullscreen ao carregar
-  forcarFullscreen();
 </script>
 
 </body>
