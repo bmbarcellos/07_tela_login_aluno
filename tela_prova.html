@@ -10,9 +10,6 @@
       --uff-blue: #003366;
       --uff-gray: #f4f6f8;
       --text-dark: #1f2933;
-      --cronometro-bg: #003366;
-      --cronometro-color: #ffffff;
-      --cronometro-alert: #b91c1c;
     }
 
     body {
@@ -20,7 +17,6 @@
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--uff-gray);
       color: var(--text-dark);
-      position: relative;
     }
 
     header {
@@ -30,6 +26,8 @@
       display: flex;
       align-items: center;
       gap: 16px;
+      position: relative;
+      z-index: 2;
     }
 
     header img {
@@ -50,6 +48,7 @@
       padding: 32px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
       position: relative;
+      z-index: 1;
     }
 
     .prova-info {
@@ -66,33 +65,20 @@
       font-size: 0.85rem;
     }
 
-    /* ===================== */
-    /* CRONÔMETRO FIXO E MODERNO */
-    /* ===================== */
+    /* 🔹 CRONÔMETRO MODERNO FIXO */
     .cronometro-fixo {
       position: fixed;
-      top: 24px;
-      right: 24px;
-      background: var(--cronometro-bg);
-      color: var(--cronometro-color);
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-      z-index: 1000;
-      transition: background 0.3s;
-    }
-
-    .cronometro-alert {
-      background: var(--cronometro-alert);
+      top: 16px;
+      right: 16px;
+      background: #003366;
       color: #ffffff;
-      animation: piscar 1s infinite alternate;
-    }
-
-    @keyframes piscar {
-      0% { opacity: 1; }
-      100% { opacity: 0.6; }
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 9999;
     }
 
     .questao {
@@ -153,7 +139,7 @@
   <div class="title">Universidade Federal Fluminense</div>
 </header>
 
-<div id="cronometro" class="cronometro-fixo"></div>
+<div id="cronometro-fixo" class="cronometro-fixo">00:00</div>
 
 <main>
 
@@ -196,7 +182,7 @@
 
   function iniciarCronometro(fimHora) {
     const fim = criarDataHoje(fimHora);
-    const cronometroDiv = document.getElementById("cronometro");
+    const display = document.getElementById("cronometro-fixo");
 
     intervaloTimer = setInterval(() => {
       const diff = fim - new Date();
@@ -206,19 +192,8 @@
         enviarProva();
         return;
       }
-
       const s = Math.floor(diff / 1000);
-      const minutos = String(Math.floor(s/60)).padStart(2,"0");
-      const segundos = String(s%60).padStart(2,"0");
-      cronometroDiv.innerText = `${minutos}:${segundos}`;
-
-      // Alerta visual se faltar menos de 5 minutos
-      if (s <= 5*60) {
-        cronometroDiv.classList.add("cronometro-alert");
-      } else {
-        cronometroDiv.classList.remove("cronometro-alert");
-      }
-
+      display.innerText = `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
     }, 1000);
   }
 
@@ -325,16 +300,7 @@
     });
 
     alert("✅ Prova enviada com sucesso.");
-  }
-
-  async function forcarFullscreen() {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch (e) {
-      console.warn("Não foi possível ativar fullscreen automaticamente:", e);
-    }
+    window.location.href = "fim.html";
   }
 
   // ===============================
@@ -349,8 +315,6 @@
 
   provaAtual = JSON.parse(provaRaw);
 
-  forcarFullscreen();
-
   document.getElementById("provaId").innerText = provaAtual.prova_id;
   iniciarCronometro(provaAtual.fim);
   renderizarQuestoes(provaAtual.questoes);
@@ -359,6 +323,9 @@
 
   document.getElementById("btnEnviar").onclick = enviarProva;
 
+  // ===============================
+  // DETECÇÃO ANTI-FRAUDE (FULLSCREEN / PERDA DE FOCO)
+  // ===============================
   document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
   });
@@ -366,6 +333,9 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) registrarViolacao("TROCA_DE_ABA");
   });
+
+  // 🔹 FORÇAR TELA CHEIA AO CARREGAR
+  document.documentElement.requestFullscreen().catch(()=>{});
 </script>
 
 </body>
