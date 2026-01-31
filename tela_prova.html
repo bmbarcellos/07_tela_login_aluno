@@ -315,7 +315,7 @@
   document.getElementById("btnEnviar").onclick = enviarProva;
 
   // ===============================
-  // ANTI-FRAUDE: FULLSCREEN E FOCO
+  // ANTI-FRAUDE: FULLSCREEN, FOCO, COPY/PASTE/PRINT
   // ===============================
   let violacoesAtivas = {};
 
@@ -335,7 +335,7 @@
 
     if (violacoesAtivas[tipo] === 1) {
       bloquearProva();
-      alert("⚠️ Você violou uma instrução da prova (ex: saiu do fullscreen ou mudou de aba). Esta ação foi registrada.");
+      alert("⚠️ Você violou uma instrução da prova (ex: saiu do fullscreen, mudou de aba ou tentou copiar/colar). Esta ação foi registrada.");
       setTimeout(() => desbloquearProva(), 2000);
     } else {
       alert("🚨 Você cometeu a mesma violação novamente. A prova será encerrada.");
@@ -361,6 +361,18 @@
 
   window.addEventListener("blur", () => {
     violacao("PERDEU_FOCO");
+  });
+
+  // Bloqueio de copiar, colar, recortar, clique direito e imprimir
+  document.addEventListener("copy", e => { e.preventDefault(); violacao("COPIAR"); });
+  document.addEventListener("cut", e => { e.preventDefault(); violacao("RECORTAR"); });
+  document.addEventListener("paste", e => { e.preventDefault(); violacao("COLAR"); });
+  document.addEventListener("contextmenu", e => { e.preventDefault(); violacao("BOTAO_DIREITO"); });
+  window.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      violacao("IMPRIMIR");
+    }
   });
 
   // ativa fullscreen ao carregar
