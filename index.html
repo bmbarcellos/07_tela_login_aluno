@@ -191,7 +191,10 @@
 
       const data = await response.json();
 
-      if (data.erro) {
+      // ✅ CORREÇÃO MÍNIMA (array ou objeto)
+      const payload = Array.isArray(data) ? data[0] : data;
+
+      if (payload.erro) {
         erroDiv.innerText = "Acesso não autorizado.";
         erroDiv.style.display = "block";
         btn.disabled = false;
@@ -200,12 +203,11 @@
       }
 
       // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", data[0].session_token);
-      sessionStorage.setItem("expira_em", data[0].expira_em);
+      sessionStorage.setItem("session_token", payload.session_token);
+      sessionStorage.setItem("expira_em", payload.expira_em);
 
-      // === ALTERAÇÃO NECESSÁRIA ===
       // Persistir dados do aluno para a Página 2
-      sessionStorage.setItem("aluno", JSON.stringify(data[0].aluno));
+      sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
 
       // Redirecionar para a tela de instruções
       window.location.href = "instrucoes.html";
