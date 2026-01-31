@@ -189,28 +189,9 @@
         body: JSON.stringify({ email, matricula })
       });
 
-      const data = await response.json();
+      const aluno = JSON.parse(sessionStorage.getItem("aluno"));
+console.log(aluno.nome); // ✅ "Bruno Barcellos"
 
-      // ✅ CORREÇÃO MÍNIMA (array ou objeto)
-      const payload = Array.isArray(data) ? data[0] : data;
-
-      if (payload.erro) {
-        erroDiv.innerText = "Acesso não autorizado.";
-        erroDiv.style.display = "block";
-        btn.disabled = false;
-        btn.innerText = "Validar acesso";
-        return;
-      }
-
-      // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", payload.session_token);
-      sessionStorage.setItem("expira_em", payload.expira_em);
-
-      // Persistir dados do aluno para a Página 2
-      sessionStorage.setItem("aluno", JSON.stringify(payload.aluno));
-
-      // Redirecionar para a tela de instruções
-      window.location.href = "instrucoes.html";
 
     } catch (err) {
       erroDiv.innerText = "Erro de comunicação com o servidor.";
