@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -125,22 +125,20 @@
 </header>
 
 <main>
-  <button id="btnIniciar" class="btn">Iniciar prova</button>
 
   <div id="mensagemErro" class="erro"></div>
 
-  <div class="prova-info" id="infoProva" style="display:none">
+  <div class="prova-info" id="infoProva">
     <div class="badge" id="provaId"></div>
     <div class="timer" id="cronometro"></div>
   </div>
 
   <div id="questoes"></div>
 
-  <button id="btnEnviar" class="btn" style="display:none">Enviar prova</button>
+  <button id="btnEnviar" class="btn">Enviar prova</button>
 </main>
 
 <script>
-  const WEBHOOK_RENDER = "https://webhook.artideia.com.br/webhook/renderizar_prova";
   const WEBHOOK_SUBMIT = "https://webhook.artideia.com.br/webhook/submeter_prova";
   const WEBHOOK_AUTOSAVE = "https://webhook.artideia.com.br/webhook/autosave_prova";
 
@@ -293,38 +291,23 @@
     alert("✅ Prova enviada com sucesso.");
   }
 
-  async function carregarProva() {
-    const r = await fetch(WEBHOOK_RENDER);
-    const j = await r.json();
-    provaAtual = Array.isArray(j) ? j[0] : j;
-
-    document.getElementById("provaId").innerText = provaAtual.prova_id;
-    document.getElementById("infoProva").style.display = "flex";
-    document.getElementById("btnEnviar").style.display = "block";
-
-    iniciarCronometro(provaAtual.fim);
-    renderizarQuestoes(provaAtual.questoes);
-
-    intervaloAutosave = setInterval(autosave, 60000);
+  // ===============================
+  // CARGA DIRETA DA PROVA VALIDADA
+  // ===============================
+  const provaRaw = sessionStorage.getItem("prova");
+  if (!provaRaw) {
+    document.getElementById("mensagemErro").innerText =
+      "Sessão inválida. Retorne à página inicial.";
+    throw new Error("Prova não encontrada no sessionStorage");
   }
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) registrarViolacao("TROCA_DE_ABA");
-  });
+  provaAtual = JSON.parse(provaRaw);
 
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
-  });
+  document.getElementById("provaId").innerText = provaAtual.prova_id;
+  iniciarCronometro(provaAtual.fim);
+  renderizarQuestoes(provaAtual.questoes);
 
-  window.addEventListener("beforeunload", () => {
-    registrarViolacao("RELOAD_OU_SAIDA");
-  });
-
-  document.getElementById("btnIniciar").onclick = async () => {
-    await document.documentElement.requestFullscreen();
-    document.getElementById("btnIniciar").style.display = "none";
-    carregarProva();
-  };
+  intervaloAutosave = setInterval(autosave, 60000);
 
   document.getElementById("btnEnviar").onclick = enviarProva;
 </script>
