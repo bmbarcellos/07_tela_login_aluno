@@ -38,7 +38,7 @@
 
     .logo {
       display: block;
-      margin: 0 auto 22px auto;
+      margin: 0 auto 18px auto;
       max-width: 180px;
     }
 
@@ -56,14 +56,13 @@
       color: #4b5563;
     }
 
-    /* BLOCO DE BOAS-VINDAS */
     .welcome {
       background: var(--uff-light-blue);
       border-left: 4px solid var(--uff-blue);
       padding: 14px 16px;
       border-radius: 8px;
       font-size: 0.9rem;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .instructions {
@@ -144,12 +143,14 @@
       class="logo"
     />
 
-    <h1>Instruções da Prova</h1>
-    <div class="subtitle">Sistema de Prova Digital – Universidade Federal Fluminense</div>
-
-    <!-- BOAS-VINDAS PERSONALIZADAS -->
+    <!-- BOAS-VINDAS PERSONALIZADAS (NOVA POSIÇÃO) -->
     <div id="welcomeMessage" class="welcome">
       Bem-vindo(a)!
+    </div>
+
+    <h1>Instruções da Prova</h1>
+    <div class="subtitle">
+      Sistema de Prova Digital – Universidade Federal Fluminense
     </div>
 
     <div class="instructions">
@@ -191,11 +192,12 @@
     const aluno = JSON.parse(alunoRaw);
     if (aluno.nome) {
       document.getElementById("welcomeMessage").innerHTML =
-        `<strong>Bem-vindo(a), ${aluno.nome}.</strong><br>Leia atentamente as instruções abaixo antes de iniciar a prova.`;
+        `<strong>Bem-vindo(a), ${aluno.nome}.</strong><br>
+         Leia atentamente as instruções abaixo antes de iniciar a prova.`;
     }
   }
 
-  // ===== LÓGICA ORIGINAL (INALTERADA) =====
+  // ===== CONTROLE DE SESSÃO =====
   const sessionToken = sessionStorage.getItem("session_token");
   const expiraEm = sessionStorage.getItem("expira_em");
 
@@ -222,8 +224,9 @@
     }
 
     sessionStorage.setItem("prova_id", provaId);
+    document.getElementById("provaId").disabled = true;
 
-    alert("Prova registrada. O botão de início será habilitado quando o professor liberar a prova.");
+    alert("Prova registrada. Aguarde liberação do professor.");
   });
 </script>
 
