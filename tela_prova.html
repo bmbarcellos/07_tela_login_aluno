@@ -10,6 +10,9 @@
       --uff-blue: #003366;
       --uff-gray: #f4f6f8;
       --text-dark: #1f2933;
+      --cronometro-bg: #003366;
+      --cronometro-color: #ffffff;
+      --cronometro-alert: #b91c1c;
     }
 
     body {
@@ -17,6 +20,7 @@
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--uff-gray);
       color: var(--text-dark);
+      position: relative;
     }
 
     header {
@@ -45,6 +49,7 @@
       border-radius: 10px;
       padding: 32px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      position: relative;
     }
 
     .prova-info {
@@ -61,9 +66,33 @@
       font-size: 0.85rem;
     }
 
-    .timer {
+    /* ===================== */
+    /* CRONÔMETRO FIXO E MODERNO */
+    /* ===================== */
+    .cronometro-fixo {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--cronometro-bg);
+      color: var(--cronometro-color);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 1.1rem;
       font-weight: bold;
-      color: #b91c1c;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+      z-index: 1000;
+      transition: background 0.3s;
+    }
+
+    .cronometro-alert {
+      background: var(--cronometro-alert);
+      color: #ffffff;
+      animation: piscar 1s infinite alternate;
+    }
+
+    @keyframes piscar {
+      0% { opacity: 1; }
+      100% { opacity: 0.6; }
     }
 
     .questao {
@@ -124,13 +153,14 @@
   <div class="title">Universidade Federal Fluminense</div>
 </header>
 
+<div id="cronometro" class="cronometro-fixo"></div>
+
 <main>
 
   <div id="mensagemErro" class="erro"></div>
 
   <div class="prova-info" id="infoProva">
     <div class="badge" id="provaId"></div>
-    <div class="timer" id="cronometro"></div>
   </div>
 
   <div id="questoes"></div>
@@ -166,6 +196,8 @@
 
   function iniciarCronometro(fimHora) {
     const fim = criarDataHoje(fimHora);
+    const cronometroDiv = document.getElementById("cronometro");
+
     intervaloTimer = setInterval(() => {
       const diff = fim - new Date();
       if (diff <= 0) {
@@ -174,9 +206,19 @@
         enviarProva();
         return;
       }
+
       const s = Math.floor(diff / 1000);
-      document.getElementById("cronometro").innerText =
-        `Tempo restante: ${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+      const minutos = String(Math.floor(s/60)).padStart(2,"0");
+      const segundos = String(s%60).padStart(2,"0");
+      cronometroDiv.innerText = `${minutos}:${segundos}`;
+
+      // Alerta visual se faltar menos de 5 minutos
+      if (s <= 5*60) {
+        cronometroDiv.classList.add("cronometro-alert");
+      } else {
+        cronometroDiv.classList.remove("cronometro-alert");
+      }
+
     }, 1000);
   }
 
@@ -274,7 +316,6 @@
       aluno
     };
 
-    // USAR O HASH VINDO DA PÁGINA 2
     const hash = provaAtual.hash_prova || "";
 
     await fetch(WEBHOOK_SUBMIT, {
@@ -286,9 +327,6 @@
     alert("✅ Prova enviada com sucesso.");
   }
 
-  // ===============================
-  // FORÇAR FULLSCREEN
-  // ===============================
   async function forcarFullscreen() {
     try {
       if (!document.fullscreenElement) {
@@ -311,7 +349,6 @@
 
   provaAtual = JSON.parse(provaRaw);
 
-  // Forçar fullscreen antes de renderizar
   forcarFullscreen();
 
   document.getElementById("provaId").innerText = provaAtual.prova_id;
@@ -322,9 +359,6 @@
 
   document.getElementById("btnEnviar").onclick = enviarProva;
 
-  // ===============================
-  // DETECÇÃO ANTI-FRAUDE (FULLSCREEN / PERDA DE FOCO)
-  // ===============================
   document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
   });
