@@ -45,6 +45,7 @@
       border-radius: 10px;
       padding: 32px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      position: relative;
     }
 
     .prova-info {
@@ -114,6 +115,21 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    /* AVISO DISCRETO DE VIOLAÇÃO */
+    #avisoViolacao {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fcd34d;
+      color: #78350f;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      display: none;
+      z-index: 1000;
+    }
   </style>
 </head>
 
@@ -125,6 +141,8 @@
 </header>
 
 <main>
+
+  <div id="avisoViolacao"></div>
 
   <div id="mensagemErro" class="erro"></div>
 
@@ -315,10 +333,12 @@
   document.getElementById("btnEnviar").onclick = enviarProva;
 
   // ===============================
-  // ANTI-FRAUDE: FULLSCREEN, FOCO, COPY/PASTE/PRINT, TROCA DE ABAS
+  // ANTI-FRAUDE
   // ===============================
   let violacoesAtivas = {};
   let ultimaTrocaAba = Date.now();
+  const ABA_STORAGE_KEY = `prova_aberta_${provaAtual.prova_id}`;
+  localStorage.setItem(ABA_STORAGE_KEY, Date.now());
 
   function bloquearProva() {
     document.getElementById("questoes").querySelectorAll("input, select").forEach(el => el.disabled = true);
@@ -330,13 +350,20 @@
     document.getElementById("btnEnviar").disabled = false;
   }
 
+  function mostrarAviso(texto) {
+    const div = document.getElementById("avisoViolacao");
+    div.innerText = texto;
+    div.style.display = "block";
+    setTimeout(() => div.style.display = "none", 3500);
+  }
+
   function violacao(tipo) {
     violacoesAtivas[tipo] = (violacoesAtivas[tipo] || 0) + 1;
     registrarViolacao(tipo);
 
     if (violacoesAtivas[tipo] === 1) {
       bloquearProva();
-      alert("⚠️ Você violou uma instrução da prova: " + tipo + ". Esta ação foi registrada.");
+      mostrarAviso("⚠️ Você violou uma instrução da prova: " + tipo);
       setTimeout(() => desbloquearProva(), 2000);
     } else {
       alert("🚨 Você cometeu a mesma violação novamente. A prova será encerrada.");
@@ -360,14 +387,12 @@
 
   window.addEventListener("blur", () => {
     const agora = Date.now();
-    // Ignora pequenas perdas de foco (<500ms) para evitar falsos positivos
     if (agora - ultimaTrocaAba > 500) {
       violacao("PERDEU_FOCO");
       ultimaTrocaAba = agora;
     }
   });
 
-  // Bloqueio de copiar, colar, recortar, clique direito e imprimir
   document.addEventListener("copy", e => { e.preventDefault(); violacao("COPIAR"); });
   document.addEventListener("cut", e => { e.preventDefault(); violacao("RECORTAR"); });
   document.addEventListener("paste", e => { e.preventDefault(); violacao("COLAR"); });
@@ -378,6 +403,19 @@
       violacao("IMPRIMIR");
     }
   });
+
+  // ===============================
+  // DETECÇÃO DE MULTIPLAS ABAS
+  // ===============================
+  window.addEventListener("storage", (e) => {
+    if (e.key === ABA_STORAGE_KEY && e.newValue != null) {
+      violacao("MULTIPLAS_ABAS");
+    }
+  });
+
+  setInterval(() => {
+    localStorage.setItem(ABA_STORAGE_KEY, Date.now());
+  }, 1000);
 
   // ativa fullscreen ao carregar
   forcarFullscreen();
