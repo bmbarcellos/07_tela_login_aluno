@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instruções – Sistema de Prova Digital UFF</title>
+  <title>Instruções da Prova – Sistema de Prova Digital UFF</title>
 
   <style>
     :root {
@@ -30,8 +30,8 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 480px;
-      padding: 36px;
+      max-width: 680px;
+      padding: 34px;
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
@@ -43,11 +43,12 @@
     }
 
     .welcome {
-      background: var(--uff-light-blue);
-      border-left: 4px solid var(--uff-blue);
-      padding: 14px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      background: var(--uff-blue);
+      color: #ffffff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.95rem;
       margin-bottom: 22px;
     }
 
@@ -61,15 +62,14 @@
     .subtitle {
       text-align: center;
       font-size: 0.9rem;
-      margin-bottom: 18px;
+      margin-bottom: 26px;
       color: #4b5563;
     }
 
     .instructions {
       font-size: 0.9rem;
-      margin-bottom: 22px;
       line-height: 1.5;
-      color: #374151;
+      margin-bottom: 26px;
     }
 
     label {
@@ -88,12 +88,6 @@
       font-size: 0.95rem;
     }
 
-    input:focus {
-      outline: none;
-      border-color: var(--uff-blue);
-      box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.15);
-    }
-
     button {
       width: 100%;
       padding: 14px;
@@ -103,25 +97,11 @@
       color: #ffffff;
       font-size: 0.95rem;
       font-weight: 600;
-      cursor: not-allowed;
-      opacity: 0.6;
-      transition: background 0.2s ease, opacity 0.2s ease;
-    }
-
-    button.enabled {
       cursor: pointer;
-      opacity: 1;
     }
 
-    button.enabled:hover {
+    button:hover {
       background: #003f7a;
-    }
-
-    .footer {
-      margin-top: 22px;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #6b7280;
     }
 
     .erro {
@@ -137,97 +117,109 @@
 <body>
   <div class="card">
 
-    <!-- LOGO -->
     <img
       src="https://bmbarcellos.github.io/07_tela_login_aluno/assets/logo-uff.png"
       alt="Universidade Federal Fluminense"
       class="logo"
     />
 
-    <!-- BOAS-VINDAS (ABAIXO DO LOGO) -->
-    <div id="welcomeMessage" class="welcome">
-      Bem-vindo(a)!
-    </div>
+    <!-- Mensagem de boas-vindas -->
+    <div id="welcomeMessage" class="welcome"></div>
 
-    <!-- TÍTULO -->
     <h1>Instruções da Prova</h1>
     <div class="subtitle">
       Sistema de Prova Digital – Universidade Federal Fluminense
     </div>
 
     <div class="instructions">
-      <ul>
-        <li>Leia atentamente todas as questões antes de responder.</li>
-        <li>Não é permitido abrir outras abas ou aplicativos durante a prova.</li>
-        <li>Qualquer tentativa de fraude será registrada.</li>
-        <li>O botão "Iniciar Prova" será ativado somente quando o professor liberar a prova.</li>
-      </ul>
+      <p>Leia atentamente as instruções antes de iniciar a prova.</p>
+      <p>A prova só poderá ser acessada após liberação do professor.</p>
     </div>
 
     <div id="mensagemErro" class="erro"></div>
 
-    <form id="provaForm">
-      <label for="provaId">ID da Prova</label>
-      <input
-        type="text"
-        id="provaId"
-        name="provaId"
-        placeholder="Digite o código da prova"
-        required
-      />
+    <!-- 🔹 AJUSTE NECESSÁRIO: campo do ID da prova -->
+    <label for="provaId">ID da Prova</label>
+    <input
+      type="text"
+      id="provaId"
+      placeholder="Digite o ID da prova fornecido pelo professor"
+      required
+    />
 
-      <button id="btnIniciar" type="submit" disabled>
-        Iniciar Prova
-      </button>
-    </form>
-
-    <div class="footer">
-      Ambiente experimental para avaliações acadêmicas digitais
-    </div>
+    <!-- 🔹 AJUSTE NECESSÁRIO: botão iniciar prova -->
+    <button id="btnIniciarProva">
+      Iniciar prova
+    </button>
 
   </div>
 
 <script>
-  // ===== BOAS-VINDAS COM NOME DO ALUNO =====
-  const alunoRaw = sessionStorage.getItem("aluno");
-  if (alunoRaw) {
-    const aluno = JSON.parse(alunoRaw);
-    if (aluno.nome) {
-      document.getElementById("welcomeMessage").innerHTML =
-        `<strong>Bem-vindo(a), ${aluno.nome}.</strong><br>
-         Leia atentamente as instruções abaixo antes de iniciar a prova.`;
-    }
-  }
-
-  // ===== CONTROLE DE SESSÃO =====
-  const sessionToken = sessionStorage.getItem("session_token");
-  const expiraEm = sessionStorage.getItem("expira_em");
+  const WEBHOOK_RENDERIZAR_PROVA =
+    "https://webhook.artideia.com.br/webhook/renderizar_prova";
 
   const erroDiv = document.getElementById("mensagemErro");
-  const btn = document.getElementById("btnIniciar");
-  const form = document.getElementById("provaForm");
 
-  if (!sessionToken || !expiraEm || new Date() > new Date(expiraEm)) {
-    erroDiv.innerText = "Sessão inválida ou expirada. Volte para a tela de login.";
-    erroDiv.style.display = "block";
-    form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+  // Recupera aluno da sessão
+  const alunoRaw = sessionStorage.getItem("aluno");
+  if (!alunoRaw) {
+    window.location.href = "index.html";
   }
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const provaId = document.getElementById("provaId").value.trim();
+  const aluno = JSON.parse(alunoRaw);
 
-    if (!provaId) {
-      erroDiv.innerText = "Digite o código da prova para continuar.";
-      erroDiv.style.display = "block";
-      return;
-    }
+  // Exibe mensagem de boas-vindas
+  document.getElementById("welcomeMessage").innerHTML =
+    `<strong>Bem-vindo(a), ${aluno.nome}</strong>`;
 
-    sessionStorage.setItem("prova_id", provaId);
-    document.getElementById("provaId").disabled = true;
+  // Handler do botão
+  document
+    .getElementById("btnIniciarProva")
+    .addEventListener("click", async () => {
 
-    alert("Prova registrada. Aguarde liberação do professor.");
-  });
+      erroDiv.style.display = "none";
+
+      const provaId = document.getElementById("provaId").value.trim();
+
+      if (!provaId) {
+        erroDiv.innerText = "Informe o ID da prova.";
+        erroDiv.style.display = "block";
+        return;
+      }
+
+      try {
+        const response = await fetch(WEBHOOK_RENDERIZAR_PROVA, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prova_id: provaId,
+            aluno: {
+              nome: aluno.nome,
+              matricula: aluno.matricula,
+              email: aluno.email
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.erro) {
+          erroDiv.innerText = "Prova não disponível para execução.";
+          erroDiv.style.display = "block";
+          return;
+        }
+
+        // Guarda a prova para a próxima página
+        sessionStorage.setItem("prova", JSON.stringify(data));
+        sessionStorage.setItem("prova_id", provaId);
+
+        window.location.href = "prova.html";
+
+      } catch (e) {
+        erroDiv.innerText = "Erro de comunicação com o servidor.";
+        erroDiv.style.display = "block";
+      }
+    });
 </script>
 
 </body>
