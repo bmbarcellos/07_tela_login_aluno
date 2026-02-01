@@ -65,7 +65,6 @@
       font-size: 0.85rem;
     }
 
-    /* 🔹 CRONÔMETRO MODERNO FIXO */
     .cronometro-fixo {
       position: fixed;
       top: 16px;
@@ -167,7 +166,7 @@
   function registrarViolacao(tipo) {
     if (provaFinalizada) return;
     if (violacoes.includes(tipo)) {
-      enviarProva(); // Segunda violação encerra prova
+      enviarProva();
     } else {
       violacoes.push(tipo);
       alert(`⚠️ Violação detectada: ${tipo}`);
@@ -193,7 +192,8 @@
         return;
       }
       const s = Math.floor(diff / 1000);
-      display.innerText = `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+      display.innerText =
+        `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
     }, 1000);
   }
 
@@ -258,21 +258,12 @@
     return respostas;
   }
 
-  async function autosave() {
-    const payload = {
-      prova_id: provaAtual.prova_id,
-      respostas: coletarRespostas(),
-      violacoes,
-      timestamp: new Date().toISOString()
-    };
-
-    const hash = provaAtual.hash_prova || "";
-
-    fetch(WEBHOOK_AUTOSAVE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload, hash })
-    });
+  async function sha256(texto) {
+    const data = new TextEncoder().encode(texto);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
   }
 
   async function enviarProva() {
@@ -291,21 +282,23 @@
       aluno
     };
 
-    const hash = provaAtual.hash_prova || "";
+    const payloadString = JSON.stringify(payload);
+    const hash = await sha256(payloadString);
 
     await fetch(WEBHOOK_SUBMIT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload, hash })
+      body: JSON.stringify({
+        payload_string: payloadString,
+        payload,
+        hash
+      })
     });
 
     alert("✅ Prova enviada com sucesso.");
     window.location.href = "fim.html";
   }
 
-  // ===============================
-  // CARGA DA PROVA
-  // ===============================
   const provaRaw = sessionStorage.getItem("prova");
   if (!provaRaw) {
     document.getElementById("mensagemErro").innerText =
@@ -319,13 +312,8 @@
   iniciarCronometro(provaAtual.fim);
   renderizarQuestoes(provaAtual.questoes);
 
-  intervaloAutosave = setInterval(autosave, 60000);
-
   document.getElementById("btnEnviar").onclick = enviarProva;
 
-  // ===============================
-  // DETECÇÃO ANTI-FRAUDE (FULLSCREEN / PERDA DE FOCO)
-  // ===============================
   document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement) registrarViolacao("SAIU_FULLSCREEN");
   });
@@ -334,7 +322,6 @@
     if (document.hidden) registrarViolacao("TROCA_DE_ABA");
   });
 
-  // 🔹 FORÇAR TELA CHEIA AO CARREGAR
   document.documentElement.requestFullscreen().catch(()=>{});
 </script>
 
