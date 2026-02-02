@@ -74,7 +74,6 @@
       padding: 10px 16px;
       border-radius: 8px;
       font-weight: bold;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
       font-size: 1rem;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       z-index: 9999;
@@ -144,7 +143,7 @@
 
   <div id="mensagemErro" class="erro"></div>
 
-  <div class="prova-info" id="infoProva">
+  <div class="prova-info">
     <div class="badge" id="provaId"></div>
   </div>
 
@@ -162,6 +161,15 @@
   let intervaloAutosave = null;
   let violacoes = [];
   let provaFinalizada = false;
+
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
 
   function registrarViolacao(tipo) {
     if (provaFinalizada) return;
@@ -214,23 +222,23 @@
       }
 
       if (q.Tipo_questao === "correlacao" && Array.isArray(q.Pares)) {
-  const opcoes = q.Pares.map(p => p.colunaB);
+        const opcoes = shuffleArray(q.Pares.map(p => p.colunaB));
+        const questaoId = `q${i}`;
 
-  corpo = `
-    <div class="correlacao">
-      ${q.Pares.map((p,j)=>`
-        <div class="par">
-          <span>${p.colunaA}</span>
-          <select name="q${i}_p${j}">
-            <option value="">Selecione</option>
-            ${opcoes.map(o=>`<option value="${o}">${o}</option>`).join("")}
-          </select>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
+        corpo = `
+          <div class="correlacao">
+            ${q.Pares.map((p,j)=>`
+              <div class="par">
+                <span>${p.colunaA}</span>
+                <select name="${questaoId}_p${j}" data-questao="${questaoId}">
+                  <option value="">Selecione</option>
+                  ${opcoes.map(o=>`<option value="${o}">${o}</option>`).join("")}
+                </select>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
 
       c.innerHTML += `
         <div class="questao">
@@ -241,6 +249,28 @@
       `;
     });
   }
+
+  document.addEventListener("change", function(e) {
+    if (e.target.tagName !== "SELECT") return;
+
+    const questaoId = e.target.dataset.questao;
+    if (!questaoId) return;
+
+    const selects = document.querySelectorAll(
+      `select[data-questao="${questaoId}"]`
+    );
+
+    const usados = Array.from(selects)
+      .map(s => s.value)
+      .filter(v => v !== "");
+
+    selects.forEach(sel => {
+      Array.from(sel.options).forEach(opt => {
+        if (opt.value === "") return;
+        opt.disabled = usados.includes(opt.value) && sel.value !== opt.value;
+      });
+    });
+  });
 
   function coletarRespostas() {
     const respostas = {};
