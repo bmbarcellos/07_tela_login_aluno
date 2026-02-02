@@ -213,22 +213,24 @@
         `).join("");
       }
 
-      if (q.Tipo_questao === "correlacao" && q.Pares) {
-        const opcoes = q.Pares.map(p => p.direita);
-        corpo = `
-          <div class="correlacao">
-            ${q.Pares.map((p,j)=>`
-              <div class="par">
-                <span>${p.esquerda}</span>
-                <select name="q${i}_p${j}">
-                  <option value="">Selecione</option>
-                  ${opcoes.map(o=>`<option value="${o}">${o}</option>`).join("")}
-                </select>
-              </div>
-            `).join("")}
-          </div>
-        `;
-      }
+      if (q.Tipo_questao === "correlacao" && Array.isArray(q.Pares)) {
+  const opcoes = q.Pares.map(p => p.colunaB);
+
+  corpo = `
+    <div class="correlacao">
+      ${q.Pares.map((p,j)=>`
+        <div class="par">
+          <span>${p.colunaA}</span>
+          <select name="q${i}_p${j}">
+            <option value="">Selecione</option>
+            ${opcoes.map(o=>`<option value="${o}">${o}</option>`).join("")}
+          </select>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 
       c.innerHTML += `
         <div class="questao">
