@@ -189,26 +189,29 @@
         body: JSON.stringify({ email, matricula })
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.erro) {
-        erroDiv.innerText = "Acesso não autorizado.";
-        erroDiv.style.display = "block";
-        btn.disabled = false;
-        btn.innerText = "Validar acesso";
-        return;
+      /* ===== AJUSTE ÚNICO E CONTROLADO =====
+         O workflow 6 retorna um ARRAY com 1 objeto
+      ===================================== */
+      if (!Array.isArray(result) || !result[0] || result[0].login !== "OK") {
+        throw new Error("Login inválido");
       }
 
-      // Login OK → salvar sessão
-      sessionStorage.setItem("session_token", data.session_token);
-      sessionStorage.setItem("expira_em", data.expira_em);
-      sessionStorage.setItem("aluno", JSON.stringify(data.aluno));
+      const sessao = result[0];
 
-      // Redirecionar para a tela de instruções
+      // Armazenar sessão (compatível com a página 2)
+      sessionStorage.setItem("session_token", sessao.session_token);
+      sessionStorage.setItem("expira_em", sessao.expira_em);
+      sessionStorage.setItem("aluno", JSON.stringify(sessao.aluno));
+
+      // Armazenar JSON completo para auditoria futura
+      sessionStorage.setItem("sessao_login", JSON.stringify(sessao));
+
       window.location.href = "instrucoes.html";
 
     } catch (err) {
-      erroDiv.innerText = "Erro de comunicação com o servidor.";
+      erroDiv.innerText = "Acesso não autorizado.";
       erroDiv.style.display = "block";
       btn.disabled = false;
       btn.innerText = "Validar acesso";
