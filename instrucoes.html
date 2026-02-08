@@ -9,7 +9,7 @@
     :root {
       --uff-blue: #00529b;
       --uff-light-blue: #e6f0fa;
-      --uff-welcome-blue: #7da6e0; /* azul mais claro para o retângulo de boas-vindas */
+      --uff-welcome-blue: #7da6e0;
       --text-dark: #1f2933;
     }
 
@@ -31,7 +31,7 @@
     .card {
       background: #ffffff;
       width: 100%;
-      max-width: 480px; /* padronizado com a página 1 */
+      max-width: 480px;
       padding: 34px;
       border-radius: 14px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
@@ -75,7 +75,7 @@
     }
 
     .instructions p:last-child {
-      text-align: center; /* centraliza a mensagem de boa prova */
+      text-align: center;
       font-weight: bold;
     }
 
@@ -88,18 +88,15 @@
 
     input {
       width: 100%;
-      max-width: 100%; /* padronizado */
       padding: 12px 14px;
       margin-bottom: 18px;
       border-radius: 8px;
       border: 1px solid #d1d5db;
       font-size: 0.95rem;
-      box-sizing: border-box;
     }
 
     button {
       width: 100%;
-      max-width: 100%; /* padronizado */
       padding: 14px;
       border-radius: 10px;
       border: none;
@@ -108,7 +105,6 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      box-sizing: border-box;
     }
 
     button:hover {
@@ -143,11 +139,11 @@
 
     <div class="instructions">
       <p>1. Leia atentamente todas as questões antes de responder.</p>
-      <p>2. Mantenha-se com a prova em <strong>tela cheia</strong>; qualquer tentativa de sair do modo fullscreen será registrada.</p>
-      <p>3. Não alterne entre abas ou janelas do navegador durante a prova.</p>
-      <p>4. Evite atualizar ou recarregar a página; isso pode invalidar sua sessão.</p>
-      <p>5. Todas as respostas são registradas e salvas automaticamente.</p>
-      <p>6. Qualquer comportamento fora do esperado será registrado e analisado pelo sistema.</p>
+      <p>2. Mantenha-se com a prova em <strong>tela cheia</strong>.</p>
+      <p>3. Não alterne entre abas ou janelas do navegador.</p>
+      <p>4. Evite atualizar ou recarregar a página.</p>
+      <p>5. Todas as respostas são registradas automaticamente.</p>
+      <p>6. Qualquer comportamento fora do esperado será registrado.</p>
       <p>✅ <strong>Boa prova!</strong></p>
     </div>
 
@@ -176,16 +172,14 @@
   /* ===============================
      Recupera dados da sessão
      =============================== */
-  const authRaw = sessionStorage.getItem("sessao_login");  <!-- Corrigido para "sessao_login" -->
+  const authRaw = sessionStorage.getItem("sessao_login"); // corrigido
 
   if (!authRaw) {
-    // sessão inexistente → volta ao login
     window.location.href = "index.html";
   }
 
   const auth = JSON.parse(authRaw);
 
-  // valida token
   if (!auth.session_token || !auth.expira_em) {
     sessionStorage.clear();
     window.location.href = "index.html";
@@ -202,18 +196,12 @@
 
   const aluno = auth.aluno;
 
-  /* ===============================
-     Mensagem de boas-vindas
-     =============================== */
   document.getElementById("welcomeMessage").innerHTML =
     `<strong>Bem-vindo(a), ${aluno.nome}</strong><br>
      <span style="font-size:0.85rem">
        ${aluno.curso} · Matrícula ${aluno.matricula}
      </span>`;
 
-  /* ===============================
-     Iniciar prova
-     =============================== */
   document
     .getElementById("btnIniciarProva")
     .addEventListener("click", async () => {
@@ -235,6 +223,7 @@
           body: JSON.stringify({
             prova_id: provaId,
             session_token: auth.session_token,
+            matricula: aluno.matricula,
             aluno: {
               nome: aluno.nome,
               matricula: aluno.matricula,
@@ -246,13 +235,18 @@
 
         const data = await response.json();
 
+        if (data.status === "BLOQUEADO") {
+          erroDiv.innerText = "Você já realizou esta prova.";
+          erroDiv.style.display = "block";
+          return;
+        }
+
         if (data.erro) {
           erroDiv.innerText = "Prova não disponível para execução.";
           erroDiv.style.display = "block";
           return;
         }
 
-        // persiste contexto da prova
         sessionStorage.setItem("prova", JSON.stringify(data));
         sessionStorage.setItem("prova_id", provaId);
 
@@ -264,7 +258,6 @@
       }
     });
 </script>
-
 
 </body>
 </html>
