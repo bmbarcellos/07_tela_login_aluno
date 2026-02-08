@@ -203,6 +203,7 @@
     sessionStorage.setItem("aluno", JSON.stringify(result.aluno));
     sessionStorage.setItem("sessao_login", JSON.stringify(result));
 
+    console.log("Redirecionando para a página 2...");
     window.location.href = "instrucoes.html";
 
   } catch (err) {
