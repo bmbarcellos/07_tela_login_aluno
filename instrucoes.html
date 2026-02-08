@@ -176,7 +176,7 @@
   /* ===============================
      Recupera dados da sessão
      =============================== */
-  const authRaw = sessionStorage.getItem("auth");  // alterado para a chave "auth"
+  const authRaw = sessionStorage.getItem("sessao_login");  <!-- Corrigido para "sessao_login" -->
 
   if (!authRaw) {
     // sessão inexistente → volta ao login
@@ -264,6 +264,7 @@
       }
     });
 </script>
+
 
 </body>
 </html>
