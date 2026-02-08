@@ -173,16 +173,47 @@
 
   const erroDiv = document.getElementById("mensagemErro");
 
-  const alunoRaw = sessionStorage.getItem("aluno");
-  if (!alunoRaw) {
+  /* ===============================
+     Recupera dados da sessão
+     =============================== */
+  const authRaw = sessionStorage.getItem("auth");
+
+  if (!authRaw) {
+    // sessão inexistente → volta ao login
     window.location.href = "index.html";
   }
 
-  const aluno = JSON.parse(alunoRaw);
+  const auth = JSON.parse(authRaw);
 
+  // valida token
+  if (!auth.session_token || !auth.expira_em) {
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  }
+
+  const agora = new Date();
+  const expiracao = new Date(auth.expira_em);
+
+  if (agora > expiracao) {
+    sessionStorage.clear();
+    alert("Sua sessão expirou. Faça login novamente.");
+    window.location.href = "index.html";
+  }
+
+  const aluno = auth.aluno;
+
+  /* ===============================
+     Mensagem de boas-vindas
+     =============================== */
   document.getElementById("welcomeMessage").innerHTML =
-    `<strong>Bem-vindo(a), ${aluno.nome}</strong>`;
+    `<strong>Bem-vindo(a), ${aluno.nome}</strong><br>
+     <span style="font-size:0.85rem">
+       ${aluno.curso} · Matrícula ${aluno.matricula}
+     </span>`;
 
+  /* ===============================
+     Iniciar prova
+     =============================== */
   document
     .getElementById("btnIniciarProva")
     .addEventListener("click", async () => {
@@ -203,10 +234,12 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prova_id: provaId,
+            session_token: auth.session_token,
             aluno: {
               nome: aluno.nome,
               matricula: aluno.matricula,
-              email: aluno.email
+              email: aluno.email,
+              curso: aluno.curso
             }
           })
         });
@@ -219,6 +252,7 @@
           return;
         }
 
+        // persiste contexto da prova
         sessionStorage.setItem("prova", JSON.stringify(data));
         sessionStorage.setItem("prova_id", provaId);
 
