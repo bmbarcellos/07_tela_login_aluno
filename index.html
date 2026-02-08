@@ -166,57 +166,53 @@
   const btn = form.querySelector("button");
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    erroDiv.style.display = "none";
-    btn.disabled = true;
-    btn.innerText = "Validando...";
+  e.preventDefault();
+  erroDiv.style.display = "none";
+  btn.disabled = true;
+  btn.innerText = "Validando...";
 
-    const email = document.getElementById("email").value.trim();
-    const matricula = document.getElementById("matricula").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const matricula = document.getElementById("matricula").value.trim();
 
-    if (!email || !matricula) {
-      erroDiv.innerText = "Preencha todos os campos.";
-      erroDiv.style.display = "block";
-      btn.disabled = false;
-      btn.innerText = "Validar acesso";
-      return;
+  if (!email || !matricula) {
+    erroDiv.innerText = "Preencha todos os campos.";
+    erroDiv.style.display = "block";
+    btn.disabled = false;
+    btn.innerText = "Validar acesso";
+    return;
+  }
+
+  try {
+    const response = await fetch(WEBHOOK_LOGIN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, matricula })
+    });
+
+    const raw = await response.json();
+    const result = Array.isArray(raw) ? raw[0] : raw;
+
+    // Verifica se o login é OK
+    if (!result || result.login !== "OK") {
+      throw new Error("Login inválido");
     }
 
-    try {
-      const response = await fetch(WEBHOOK_LOGIN, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, matricula })
-      });
+    // Armazenar a sessão
+    sessionStorage.setItem("session_token", result.session_token);
+    sessionStorage.setItem("expira_em", result.expira_em);
+    sessionStorage.setItem("aluno", JSON.stringify(result.aluno));
+    sessionStorage.setItem("sessao_login", JSON.stringify(result));
 
-      const result = await response.json();
+    window.location.href = "instrucoes.html";
 
-      /* ===== AJUSTE ÚNICO E CONTROLADO =====
-         O workflow 6 retorna um ARRAY com 1 objeto
-      ===================================== */
-      if (!Array.isArray(result) || !result[0] || result[0].login !== "OK") {
-        throw new Error("Login inválido");
-      }
+  } catch (err) {
+    erroDiv.innerText = "Acesso não autorizado.";
+    erroDiv.style.display = "block";
+    btn.disabled = false;
+    btn.innerText = "Validar acesso";
+  }
+});
 
-      const sessao = result[0];
-
-      // Armazenar sessão (compatível com a página 2)
-      sessionStorage.setItem("session_token", sessao.session_token);
-      sessionStorage.setItem("expira_em", sessao.expira_em);
-      sessionStorage.setItem("aluno", JSON.stringify(sessao.aluno));
-
-      // Armazenar JSON completo para auditoria futura
-      sessionStorage.setItem("sessao_login", JSON.stringify(sessao));
-
-      window.location.href = "instrucoes.html";
-
-    } catch (err) {
-      erroDiv.innerText = "Acesso não autorizado.";
-      erroDiv.style.display = "block";
-      btn.disabled = false;
-      btn.innerText = "Validar acesso";
-    }
-  });
 </script>
 
 </body>
