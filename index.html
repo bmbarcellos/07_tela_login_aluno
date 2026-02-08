@@ -203,8 +203,14 @@
     sessionStorage.setItem("aluno", JSON.stringify(result.aluno));
     sessionStorage.setItem("sessao_login", JSON.stringify(result));
 
-    console.log("Redirecionando para a página 2...");
-    window.location.href = "instrucoes.html";
+    console.log("Dados armazenados no sessionStorage:", sessionStorage.getItem("session_token"));
+console.log("Redirecionando para a página 2...");
+
+// Redirecionamento com delay para garantir execução
+setTimeout(() => {
+  window.location.href = "instrucoes.html";
+}, 500); // Redireciona após meio segundo
+
 
   } catch (err) {
     erroDiv.innerText = "Acesso não autorizado.";
